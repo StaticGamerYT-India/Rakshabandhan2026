@@ -99,155 +99,6 @@
       padding-bottom: 6px;
     }
 
-    .itinerary {
-      margin: 0 auto 14px;
-      width: min(1140px, 100%);
-      display: grid;
-      gap: 10px;
-      grid-template-columns: 1.1fr 0.9fr;
-      pointer-events: auto;
-    }
-
-    .panel {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 18px 48px rgba(255, 255, 255, 0.05);
-      padding: 14px 16px;
-    }
-
-    .panel h2 {
-      margin: 0 0 8px;
-      font-size: 0.92rem;
-      text-transform: uppercase;
-      letter-spacing: 0.22em;
-      color: rgba(255, 255, 255, 0.82);
-    }
-
-    .steps {
-      display: grid;
-      gap: 8px;
-    }
-
-    .step {
-      display: grid;
-      grid-template-columns: 72px 1fr;
-      gap: 10px;
-      align-items: center;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(0, 0, 0, 0.22);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .step .time {
-      font-size: 0.78rem;
-      letter-spacing: 0.2em;
-      color: rgba(255, 255, 255, 0.68);
-      text-transform: uppercase;
-    }
-
-    .step .desc {
-      color: rgba(255, 255, 255, 0.92);
-      font-size: 0.96rem;
-    }
-
-    .vote-btn {
-      appearance: none;
-      border: 0;
-      border-radius: 16px;
-      padding: 14px 16px;
-      background: linear-gradient(135deg, rgba(255, 210, 106, 0.95), rgba(255, 124, 164, 0.92));
-      color: #0a0a0a;
-      font-weight: 800;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      cursor: pointer;
-      width: 100%;
-      box-shadow: 0 14px 32px rgba(255, 164, 98, 0.24);
-    }
-
-    .vote-btn:hover {
-      filter: brightness(1.04);
-    }
-
-    .vote-panel {
-      display: grid;
-      gap: 10px;
-    }
-
-    .vote-list {
-      display: grid;
-      gap: 8px;
-    }
-
-    .vote-option {
-      display: grid;
-      gap: 8px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(0, 0, 0, 0.22);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .vote-option .name {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      font-size: 0.96rem;
-      color: rgba(255, 255, 255, 0.94);
-    }
-
-    .vote-option input {
-      accent-color: #ffd26a;
-    }
-
-    .result-row {
-      display: grid;
-      gap: 5px;
-    }
-
-    .result-row .bar {
-      height: 8px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.09);
-      overflow: hidden;
-    }
-
-    .result-row .fill {
-      height: 100%;
-      width: 0%;
-      border-radius: inherit;
-      background: linear-gradient(90deg, #ffd36a, #ff7ca8);
-      transition: width 240ms ease;
-    }
-
-    .result-row .meta {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      color: rgba(255, 255, 255, 0.76);
-      font-size: 0.8rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .vote-note {
-      color: rgba(255, 255, 255, 0.66);
-      font-size: 0.82rem;
-      line-height: 1.4;
-    }
-
-    .vote-status {
-      font-size: 0.9rem;
-      color: rgba(255, 255, 255, 0.92);
-      min-height: 1.2em;
-    }
-
     .timer {
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -311,10 +162,6 @@
         padding: 14px;
       }
 
-      .itinerary {
-        grid-template-columns: 1fr;
-      }
-
       .timer {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
@@ -348,59 +195,6 @@
       <h1>Rakshabandhan</h1>
       <p class="subtitle">A tiny countdown for big sibling energy.</p>
     </header>
-
-    <section class="itinerary" aria-label="Rakshabandhan itinerary and cafe vote">
-      <div class="panel">
-        <h2>Day Itinerary</h2>
-        <div class="steps">
-          <div class="step">
-            <div class="time">Home</div>
-            <div class="desc">Everyone meets at the house, fixes the chaos, and gets ready.</div>
-          </div>
-          <div class="step">
-            <div class="time">Cafe</div>
-            <div class="desc">Then everyone heads out for eating and the post-ritual sibling bargaining session.</div>
-          </div>
-          <div class="step">
-            <div class="time">Vote</div>
-            <div class="desc">Pick the cafe before the trip starts. The winning place gets the family visit.</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel vote-panel">
-        <h2>Click Me To Vote</h2>
-        <button class="vote-btn" id="openVoteBtn" type="button">Vote for a Cafe</button>
-        <div class="vote-list" id="voteList" hidden>
-          <label class="vote-option">
-            <div class="name"><span>1. The House of Failures</span><span id="percent-0">0%</span></div>
-            <input type="radio" name="cafeVote" value="0" />
-            <div class="result-row">
-              <div class="bar"><div class="fill" id="fill-0"></div></div>
-              <div class="meta"><span id="count-0">0 votes</span><span>Family chaos</span></div>
-            </div>
-          </label>
-          <label class="vote-option">
-            <div class="name"><span>2. Sakura</span><span id="percent-1">0%</span></div>
-            <input type="radio" name="cafeVote" value="1" />
-            <div class="result-row">
-              <div class="bar"><div class="fill" id="fill-1"></div></div>
-              <div class="meta"><span id="count-1">0 votes</span><span>Calm vibe</span></div>
-            </div>
-          </label>
-          <label class="vote-option">
-            <div class="name"><span>3. Shaka</span><span id="percent-2">0%</span></div>
-            <input type="radio" name="cafeVote" value="2" />
-            <div class="result-row">
-              <div class="bar"><div class="fill" id="fill-2"></div></div>
-              <div class="meta"><span id="count-2">0 votes</span><span>Full energy</span></div>
-            </div>
-          </label>
-        </div>
-        <div class="vote-status" id="voteStatus">Votes are saved on this device. Cloud sync needs a backend later.</div>
-        <div class="vote-note">Select one cafe and the results update instantly in percentages.</div>
-      </div>
-    </section>
 
     <section class="content">
       <section class="timer" aria-live="polite">
@@ -439,19 +233,6 @@
     const secondsEl = document.getElementById('seconds');
     const celebrateEl = document.getElementById('celebrate');
     const hypeEl = document.getElementById('hype');
-    const openVoteBtn = document.getElementById('openVoteBtn');
-    const voteList = document.getElementById('voteList');
-    const voteStatus = document.getElementById('voteStatus');
-    const voteInputs = Array.from(document.querySelectorAll('input[name="cafeVote"]'));
-    const voteKeys = ['the-house-of-failures', 'sakura', 'shaka'];
-    const voteCounts = [0, 0, 0];
-    const voteLabels = ['The House of Failures', 'Sakura', 'Shaka'];
-    const votePercents = [document.getElementById('percent-0'), document.getElementById('percent-1'), document.getElementById('percent-2')];
-    const voteFill = [document.getElementById('fill-0'), document.getElementById('fill-1'), document.getElementById('fill-2')];
-    const voteCount = [document.getElementById('count-0'), document.getElementById('count-1'), document.getElementById('count-2')];
-    const voteStorageKey = 'rakshabandhan2026-cafe-votes';
-    let selectedVote = null;
-    const countdownState = { remainingSeconds: 0, urgency: 0 };
 
     const hypeLines = [
       'Brace yourself. The tying of rakhi is approaching.',
@@ -476,78 +257,10 @@
       return String(value).padStart(2, '0');
     }
 
-    function loadVotes() {
-      try {
-        const raw = localStorage.getItem(voteStorageKey);
-        if (!raw) {
-          return;
-        }
-
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length === 3) {
-          parsed.forEach((value, index) => {
-            voteCounts[index] = Number.isFinite(value) ? value : 0;
-          });
-        }
-      } catch (error) {
-        voteStatus.textContent = 'Vote storage is unavailable right now.';
-      }
-    }
-
-    function saveVotes() {
-      try {
-        localStorage.setItem(voteStorageKey, JSON.stringify(voteCounts));
-      } catch (error) {
-        voteStatus.textContent = 'Could not save votes on this device.';
-      }
-    }
-
-    function renderVotes() {
-      const total = voteCounts.reduce((sum, value) => sum + value, 0);
-      voteCounts.forEach((value, index) => {
-        const percent = total === 0 ? 0 : Math.round((value / total) * 100);
-        votePercents[index].textContent = `${percent}%`;
-        voteFill[index].style.width = `${percent}%`;
-        voteCount[index].textContent = `${value} vote${value === 1 ? '' : 's'}`;
-      });
-
-      if (selectedVote !== null) {
-        voteStatus.textContent = `Your vote for ${voteLabels[selectedVote]} is saved on this device.`;
-      } else if (total === 0) {
-        voteStatus.textContent = 'No votes yet. Open the cafe chooser and pick one.';
-      } else {
-        voteStatus.textContent = 'Votes are saved on this device. Cloud sync needs a backend later.';
-      }
-    }
-
-    function castVote(index) {
-      selectedVote = index;
-      voteCounts[index] += 1;
-      saveVotes();
-      renderVotes();
-      voteInputs.forEach((input, inputIndex) => {
-        input.checked = inputIndex === index;
-      });
-    }
-
-    openVoteBtn.addEventListener('click', () => {
-      voteList.hidden = !voteList.hidden;
-      openVoteBtn.textContent = voteList.hidden ? 'Vote for a Cafe' : 'Hide Cafe Vote';
-    });
-
-    voteInputs.forEach((input) => {
-      input.addEventListener('change', () => {
-        castVote(Number(input.value));
-      });
-    });
-
     function renderCountdown() {
       const now = new Date();
       const target = getTargetDate(now);
       const remaining = target - now;
-
-      countdownState.remainingSeconds = Math.max(0, Math.floor(remaining / 1000));
-      countdownState.urgency = remaining <= 0 ? 1 : Math.min(1, 1 - (remaining / (14 * 24 * 60 * 60 * 1000)));
 
       if (remaining <= 0) {
         weeksEl.textContent = '00';
@@ -575,9 +288,6 @@
       minutesEl.textContent = pad(minutes);
       secondsEl.textContent = pad(seconds);
       hypeEl.textContent = hypeLines[totalSeconds % hypeLines.length];
-
-      const mood = totalSeconds < 60 * 60 ? 'The astronauts are drifting faster now because the day is almost here.' : 'The astronauts are floating slowly toward the gift house.';
-      voteStatus.dataset.mood = mood;
     }
 
     function createNativeScene() {
@@ -668,14 +378,13 @@
 
         state.swimmers.forEach((swimmer, index) => {
           const lane = state.height * 0.14 + (index / 13) * state.height * 0.66;
-          const urgencyPush = 1 + countdownState.urgency * 0.75;
-          const targetX = state.width * 0.2 + Math.sin(state.frame * 0.0015 + swimmer.phase) * 4;
-          const accelX = (targetX - swimmer.x) * 0.00003 * urgencyPush;
-          const accelY = (lane - swimmer.y) * 0.0001 + Math.sin(state.frame * 0.004 + swimmer.phase) * 0.0005;
-          swimmer.vx = (swimmer.vx + accelX) * 0.999;
-          swimmer.vy = (swimmer.vy + accelY) * 0.998;
-          swimmer.vz += Math.sin(state.frame * 0.0025 + swimmer.phase) * 0.000015;
-          swimmer.vz *= 0.995;
+          const targetX = state.width * 0.2 + Math.sin(state.frame * 0.003 + swimmer.phase) * 8;
+          const accelX = (targetX - swimmer.x) * 0.00005;
+          const accelY = (lane - swimmer.y) * 0.00014 + Math.sin(state.frame * 0.008 + swimmer.phase) * 0.001;
+          swimmer.vx = (swimmer.vx + accelX) * 0.998;
+          swimmer.vy = (swimmer.vy + accelY) * 0.997;
+          swimmer.vz += Math.sin(state.frame * 0.005 + swimmer.phase) * 0.00003;
+          swimmer.vz *= 0.99;
           swimmer.x += swimmer.vx * dt;
           swimmer.y += swimmer.vy * dt;
           swimmer.z += swimmer.vz * dt;
@@ -758,6 +467,19 @@
         ctx.fillStyle = vignette;
         ctx.fillRect(0, 0, state.width, state.height);
 
+        const waveCount = 8;
+        for (let i = 0; i < waveCount; i += 1) {
+          const y = state.height * (0.14 + i * 0.11);
+          ctx.strokeStyle = `rgba(255,255,255,${0.02 + i * 0.004})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          for (let x = 0; x <= state.width; x += 40) {
+            const offset = Math.sin(x * 0.01 + state.frame * 0.012 + i) * (4 + i);
+            if (x === 0) ctx.moveTo(x, y + offset);
+            else ctx.lineTo(x, y + offset);
+          }
+          ctx.stroke();
+        }
       }
 
       function drawPixelBlock(x, y, w, h, color) {
@@ -823,7 +545,9 @@
         ctx.lineWidth = 4;
         ctx.beginPath();
         ctx.moveTo(cx - 34, py + 42);
-        ctx.lineTo(cx + 34, py + 42);
+        ctx.lineTo(anchor.x - 8, anchor.y - 2);
+        ctx.moveTo(cx + 34, py + 42);
+        ctx.lineTo(anchor.x + 8, anchor.y + 2);
         ctx.moveTo(cx - 10, py + 58);
         ctx.lineTo(cx + 10, py + 58);
         ctx.stroke();
@@ -835,9 +559,9 @@
         const px = astro.x;
         const py = astro.y;
         const size = astro.size * (1 + astro.z * 0.04);
-        const drift = Math.sin(state.frame * 0.002 + astro.phase) * 0.8 * (1 - countdownState.urgency * 0.5);
-        const bob = Math.sin(state.frame * 0.003 + astro.phase * 1.1) * (1.5 + countdownState.urgency * 0.8);
-        const tilt = Math.sin(state.frame * 0.0015 + astro.phase) * 0.04 * (1 - countdownState.urgency * 0.3);
+        const drift = Math.sin(state.frame * 0.004 + astro.phase) * 1.2;
+        const bob = Math.sin(state.frame * 0.006 + astro.phase * 1.1) * 2.2;
+        const tilt = Math.sin(state.frame * 0.003 + astro.phase) * 0.08;
 
         ctx.save();
         ctx.translate(px + drift, py + bob);
@@ -953,8 +677,6 @@
     }
 
     renderCountdown();
-    loadVotes();
-    renderVotes();
     setInterval(renderCountdown, 1000);
     createNativeScene();
   </script>
