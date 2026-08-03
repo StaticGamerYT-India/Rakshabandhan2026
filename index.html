@@ -181,7 +181,6 @@
     const minutesEl = document.getElementById('minutes');
     const secondsEl = document.getElementById('seconds');
     const celebrateEl = document.getElementById('celebrate');
-    const statusEl = document.getElementById('status');
     const hypeEl = document.getElementById('hype');
 
     const hypeLines = [
@@ -220,7 +219,6 @@
         secondsEl.textContent = '00';
         celebrateEl.classList.add('show');
         hypeEl.textContent = 'It is officially Rakshabandhan. Brother-sister chaos unlocked.';
-        statusEl.textContent = 'Today is Rakshabandhan.';
         return;
       }
 
@@ -238,7 +236,6 @@
       hoursEl.textContent = pad(hours);
       minutesEl.textContent = pad(minutes);
       secondsEl.textContent = pad(seconds);
-      statusEl.textContent = `Target date: 28 August, local time. Time remaining: ${weeks}w ${days}d ${hours}h ${minutes}m ${seconds}s.`;
       hypeEl.textContent = hypeLines[totalSeconds % hypeLines.length];
     }
 
