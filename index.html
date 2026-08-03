@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rakshabandhan Countdown</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #000000;
+      --fg: #ffffff;
+      --muted: rgba(255, 255, 255, 0.72);
+      --panel: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .wrap {
+      width: min(1100px, calc(100vw - 32px));
+      text-align: center;
+      padding: 32px 18px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 4vw, 4rem);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      margin: 0 0 30px;
+      color: var(--muted);
+      font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+      letter-spacing: 0.02em;
+    }
+
+    .timer {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .unit {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px 12px 18px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 50px rgba(255, 255, 255, 0.04);
+    }
+
+    .value {
+      display: block;
+      font-size: clamp(2rem, 7vw, 4.8rem);
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+    }
+
+    .label {
+      display: block;
+      margin-top: 10px;
+      font-size: 0.86rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+    }
+
+    .note {
+      margin-top: 22px;
+      color: rgba(255, 255, 255, 0.58);
+      font-size: 0.95rem;
+    }
+
+    .celebrate {
+      margin-top: 26px;
+      font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 700;
+      display: none;
+    }
+
+    .celebrate.show {
+      display: block;
+    }
+
+    @media (max-width: 760px) {
+      .timer {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .unit:nth-child(5) {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 460px) {
+      .wrap {
+        width: min(100vw - 20px, 100%);
+      }
+
+      .timer {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .unit {
+        padding: 18px 10px 14px;
+        border-radius: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap" aria-label="Rakshabandhan countdown timer">
+    <h1>Rakshabandhan</h1>
+    <p class="subtitle">Counting down to 28 August using your device clock.</p>
+
+    <section class="timer" aria-live="polite">
+      <div class="unit">
+        <span class="value" id="weeks">00</span>
+        <span class="label">Weeks</span>
+      </div>
+      <div class="unit">
+        <span class="value" id="days">00</span>
+        <span class="label">Days</span>
+      </div>
+      <div class="unit">
+        <span class="value" id="hours">00</span>
+        <span class="label">Hours</span>
+      </div>
+      <div class="unit">
+        <span class="value" id="minutes">00</span>
+        <span class="label">Minutes</span>
+      </div>
+      <div class="unit">
+        <span class="value" id="seconds">00</span>
+        <span class="label">Seconds</span>
+      </div>
+    </section>
+
+    <div class="celebrate" id="celebrate">Happy Rakshabandhan</div>
+    <p class="note" id="status">Target date: 28 August, local time.</p>
+  </main>
+
+  <script>
+    const weeksEl = document.getElementById('weeks');
+    const daysEl = document.getElementById('days');
+    const hoursEl = document.getElementById('hours');
+    const minutesEl = document.getElementById('minutes');
+    const secondsEl = document.getElementById('seconds');
+    const celebrateEl = document.getElementById('celebrate');
+    const statusEl = document.getElementById('status');
+
+    function getTargetDate(now) {
+      const year = now.getFullYear();
+      let target = new Date(year, 7, 28, 0, 0, 0, 0);
+
+      if (now > target) {
+        target = new Date(year + 1, 7, 28, 0, 0, 0, 0);
+      }
+
+      return target;
+    }
+
+    function pad(value) {
+      return String(value).padStart(2, '0');
+    }
+
+    function render() {
+      const now = new Date();
+      const target = getTargetDate(now);
+      let remaining = target - now;
+
+      if (remaining <= 0) {
+        weeksEl.textContent = '00';
+        daysEl.textContent = '00';
+        hoursEl.textContent = '00';
+        minutesEl.textContent = '00';
+        secondsEl.textContent = '00';
+        celebrateEl.classList.add('show');
+        statusEl.textContent = 'Today is Rakshabandhan.';
+        return;
+      }
+
+      celebrateEl.classList.remove('show');
+
+      const totalSeconds = Math.floor(remaining / 1000);
+      const weeks = Math.floor(totalSeconds / (7 * 24 * 60 * 60));
+      const days = Math.floor((totalSeconds % (7 * 24 * 60 * 60)) / (24 * 60 * 60));
+      const hours = Math.floor((totalSeconds % (24 * 60 * 60)) / (60 * 60));
+      const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
+      const seconds = totalSeconds % 60;
+
+      weeksEl.textContent = pad(weeks);
+      daysEl.textContent = pad(days);
+      hoursEl.textContent = pad(hours);
+      minutesEl.textContent = pad(minutes);
+      secondsEl.textContent = pad(seconds);
+      statusEl.textContent = `Target date: 28 August, local time. Time remaining: ${weeks}w ${days}d ${hours}h ${minutes}m ${seconds}s.`;
+    }
+
+    render();
+    setInterval(render, 1000);
+  </script>
+</body>
+</html>
