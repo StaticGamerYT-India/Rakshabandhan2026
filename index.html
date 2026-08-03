@@ -303,7 +303,6 @@
         frame: 0,
         stars: [],
         swimmers: [],
-        rope: [],
         particles: [],
         bubbles: [],
       };
@@ -318,7 +317,6 @@
         ctx.setTransform(state.pixelRatio, 0, 0, state.pixelRatio, 0, 0);
         buildStars();
         buildSwimmers();
-        buildRope();
       }
 
       function buildStars() {
@@ -356,25 +354,6 @@
         }
       }
 
-      function buildRope() {
-        const segmentCount = 56;
-        state.rope = [];
-        const anchor = getHouseAnchor();
-        const startX = state.width * 0.28;
-        const startY = state.height * 0.44;
-        for (let i = 0; i < segmentCount; i += 1) {
-          const t = i / (segmentCount - 1);
-          state.rope.push({
-            x: startX + (anchor.x - startX) * t,
-            y: startY + (anchor.y - startY) * t,
-            vx: 0,
-            vy: 0,
-            pinned: i === 0 || i === segmentCount - 1,
-            mass: i === 0 || i === segmentCount - 1 ? 0 : 1,
-          });
-        }
-      }
-
       function getHouseAnchor() {
         return {
           x: state.width * 0.88,
@@ -393,14 +372,9 @@
         ctx.closePath();
       }
 
-      function lerp(a, b, t) {
-        return a + (b - a) * t;
-      }
-
       function updatePhysics() {
         const dt = 1;
         const anchor = getHouseAnchor();
-        const ropeAnchor = { x: state.width * 0.74, y: state.height * 0.46 };
 
         state.swimmers.forEach((swimmer, index) => {
           const lane = state.height * 0.14 + (index / 13) * state.height * 0.66;
@@ -438,51 +412,6 @@
           }
         });
 
-        for (let i = 0; i < state.rope.length; i += 1) {
-          const point = state.rope[i];
-          if (i === 0) {
-            point.x = state.width * 0.28 + Math.sin(state.frame * 0.014) * 8;
-            point.y = state.height * 0.44 + Math.sin(state.frame * 0.018) * 5;
-            continue;
-          }
-          if (i === state.rope.length - 1) {
-            point.x = anchor.x;
-            point.y = anchor.y;
-            continue;
-          }
-
-          point.vy += 0.08 * dt;
-          point.vx += Math.sin(state.frame * 0.04 + i * 0.18) * 0.008;
-          point.vx *= 0.99;
-          point.vy *= 0.989;
-          point.x += point.vx;
-          point.y += point.vy;
-        }
-
-        for (let iter = 0; iter < 10; iter += 1) {
-          for (let i = 0; i < state.rope.length - 1; i += 1) {
-            const a = state.rope[i];
-            const b = state.rope[i + 1];
-            const dx = b.x - a.x;
-            const dy = b.y - a.y;
-            const dist = Math.max(0.0001, Math.hypot(dx, dy));
-            const rest = lerp(8.5, 13.5, i / (state.rope.length - 1));
-            const diff = (dist - rest) / dist;
-            const stiffness = 0.42;
-            const offsetX = dx * diff * stiffness;
-            const offsetY = dy * diff * stiffness;
-
-            if (i !== 0) {
-              a.x += offsetX * 0.5;
-              a.y += offsetY * 0.5;
-            }
-            if (i + 1 !== state.rope.length - 1) {
-              b.x -= offsetX * 0.5;
-              b.y -= offsetY * 0.5;
-            }
-          }
-        }
-
         state.particles = state.particles.filter((particle) => {
           particle.vy += 0.015;
           particle.x += particle.vx;
@@ -491,7 +420,7 @@
           return particle.life > 0;
         });
 
-        return { anchor, ropeAnchor };
+        return { anchor };
       }
 
       function drawStars() {
@@ -702,9 +631,10 @@
         ctx.restore();
       }
 
-      function drawRakhiKnot(anchor) {
-        const knotX = anchor.x + 22;
-        const knotY = anchor.y + 2;
+      function drawRakhiKnot() {
+        const anchor = getHouseAnchor();
+        const knotX = anchor.x - 12;
+        const knotY = anchor.y - 8;
         ctx.save();
         ctx.imageSmoothingEnabled = false;
         ctx.shadowColor = 'rgba(255, 190, 70, 0.85)';
@@ -712,49 +642,12 @@
         drawPixelBlock(knotX - 11, knotY - 8, 22, 16, '#ffd36a');
         drawPixelBlock(knotX - 8, knotY - 5, 16, 10, '#ff7aa8');
         drawPixelBlock(knotX - 3, knotY - 2, 6, 6, '#fff2d5');
-        drawPixelBlock(knotX - 30, knotY - 2, 18, 4, '#ffd36a');
-        drawPixelBlock(knotX + 12, knotY - 2, 18, 4, '#ffd36a');
-        drawPixelBlock(knotX - 26, knotY + 4, 14, 3, '#ff9db9');
-        drawPixelBlock(knotX + 12, knotY + 4, 14, 3, '#ff9db9');
+        drawPixelBlock(knotX - 26, knotY - 2, 12, 4, '#ffd36a');
+        drawPixelBlock(knotX + 14, knotY - 2, 12, 4, '#ffd36a');
+        drawPixelBlock(knotX - 20, knotY + 4, 10, 3, '#ff9db9');
+        drawPixelBlock(knotX + 14, knotY + 4, 10, 3, '#ff9db9');
         drawPixelBlock(knotX - 2, knotY + 9, 4, 10, '#ff7aa8');
         ctx.restore();
-      }
-
-      function drawRope(anchor) {
-        const points = state.rope;
-        ctx.save();
-        ctx.lineCap = 'square';
-        ctx.lineJoin = 'miter';
-        ctx.imageSmoothingEnabled = false;
-
-        for (let i = 0; i < points.length - 1; i += 1) {
-          const a = points[i];
-          const b = points[i + 1];
-          const dx = b.x - a.x;
-          const dy = b.y - a.y;
-          const ang = Math.atan2(dy, dx);
-          const dist = Math.max(1, Math.hypot(dx, dy));
-          const pixelLen = Math.max(2, Math.round(dist / 4));
-          const x = a.x;
-          const y = a.y;
-
-          ctx.save();
-          ctx.translate(x, y);
-          ctx.rotate(ang);
-          for (let p = 0; p < pixelLen; p += 1) {
-            const phase = (state.frame + i * 3 + p) % 8;
-            const colors = ['#ffd36a', '#ff9db9', '#fff2d5', '#ffcf66'];
-            drawPixelBlock(p * 4, Math.sin((phase + p) * 0.15) * 1.1, 4, 4, colors[p % colors.length]);
-            if (p % 5 === 0) {
-              drawPixelBlock(p * 4, -3, 4, 3, '#fff4df');
-            }
-          }
-          ctx.restore();
-        }
-
-        ctx.restore();
-
-        drawRakhiKnot(anchor);
       }
 
       function animate() {
@@ -764,7 +657,7 @@
 
         const { anchor } = updatePhysics();
         drawHouse(anchor);
-        drawRope(anchor);
+        drawRakhiKnot();
 
         for (const particle of state.particles) {
           ctx.fillStyle = `rgba(255,255,255,${Math.max(0, particle.life / 50) * 0.7})`;
