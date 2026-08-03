@@ -54,6 +54,14 @@
       letter-spacing: 0.02em;
     }
 
+    .hype {
+      margin: 20px 0 0;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.98rem;
+      letter-spacing: 0.04em;
+      min-height: 1.4em;
+    }
+
     .timer {
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -135,7 +143,7 @@
 <body>
   <main class="wrap" aria-label="Rakshabandhan countdown timer">
     <h1>Rakshabandhan</h1>
-    <p class="subtitle"></p>
+    <p class="subtitle">A tiny countdown for big sibling energy.</p>
 
     <section class="timer" aria-live="polite">
       <div class="unit">
@@ -160,8 +168,10 @@
       </div>
     </section>
 
+    <p class="hype" id="hype">Loading sibling drama...</p>
+
     <div class="celebrate" id="celebrate">Happy Rakshabandhan</div>
-    <p class="note" id="status"></p>
+    
   </main>
 
   <script>
@@ -172,6 +182,15 @@
     const secondsEl = document.getElementById('seconds');
     const celebrateEl = document.getElementById('celebrate');
     const statusEl = document.getElementById('status');
+    const hypeEl = document.getElementById('hype');
+
+    const hypeLines = [
+      'Brace yourself. The tying of rakhi is approaching.',
+      'Sibling truce negotiations are now officially active.',
+      'Prepare for gifts, jokes, and selective emotional damage.',
+      'The festival of protection and playful bargaining is near.',
+      'One thread. Infinite family drama.'
+    ];
 
     function getTargetDate(now) {
       const year = now.getFullYear();
@@ -200,6 +219,7 @@
         minutesEl.textContent = '00';
         secondsEl.textContent = '00';
         celebrateEl.classList.add('show');
+        hypeEl.textContent = 'It is officially Rakshabandhan. Brother-sister chaos unlocked.';
         statusEl.textContent = 'Today is Rakshabandhan.';
         return;
       }
@@ -219,6 +239,7 @@
       minutesEl.textContent = pad(minutes);
       secondsEl.textContent = pad(seconds);
       statusEl.textContent = `Target date: 28 August, local time. Time remaining: ${weeks}w ${days}d ${hours}h ${minutes}m ${seconds}s.`;
+      hypeEl.textContent = hypeLines[totalSeconds % hypeLines.length];
     }
 
     render();
