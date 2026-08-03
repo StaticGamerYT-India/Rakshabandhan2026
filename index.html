@@ -7,150 +7,106 @@
   <style>
     :root {
       color-scheme: dark;
+      --bg: #000000;
       --fg: #ffffff;
-      --muted: rgba(255, 255, 255, 0.74);
-      --panel: rgba(255, 255, 255, 0.07);
-      --border: rgba(255, 255, 255, 0.16);
+      --muted: rgba(255, 255, 255, 0.72);
+      --panel: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.14);
     }
 
     * {
       box-sizing: border-box;
     }
 
-    html,
-    body {
+    html, body {
       margin: 0;
       width: 100%;
       height: 100%;
-      background: #000;
+      background: var(--bg);
       color: var(--fg);
-      overflow: hidden;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     body {
-      position: relative;
-    }
-
-    #scene {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-    }
-
-    #scene canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-
-    #scene::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.08), transparent 45%),
-                  linear-gradient(to bottom, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.58));
-      pointer-events: none;
-    }
-
-    .overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 2;
       display: grid;
-      grid-template-rows: auto 1fr;
-      pointer-events: none;
-      padding: 20px;
+      place-items: center;
+      overflow: hidden;
     }
 
-    .header {
-      align-self: start;
-      justify-self: center;
-      width: min(1100px, 100%);
+    .wrap {
+      width: min(1100px, calc(100vw - 32px));
       text-align: center;
-      padding: 14px 18px 16px;
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      background: rgba(0, 0, 0, 0.38);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 18px 60px rgba(255, 255, 255, 0.05);
-      margin-top: 8px;
+      padding: 32px 18px;
     }
 
     h1 {
-      margin: 0;
-      font-size: clamp(1.8rem, 3.2vw, 3.4rem);
-      letter-spacing: 0.1em;
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 4vw, 4rem);
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      font-weight: 800;
+      font-weight: 700;
     }
 
     .subtitle {
-      margin: 8px 0 0;
+      margin: 0 0 30px;
       color: var(--muted);
-      font-size: clamp(0.92rem, 1.3vw, 1.05rem);
-      letter-spacing: 0.03em;
+      font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+      letter-spacing: 0.02em;
     }
 
-    .content {
-      align-self: end;
-      justify-self: center;
-      width: min(1140px, 100%);
-      padding-bottom: 6px;
+    .hype {
+      margin: 20px 0 0;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.98rem;
+      letter-spacing: 0.04em;
+      min-height: 1.4em;
     }
 
     .timer {
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 12px;
-      pointer-events: auto;
+      gap: 14px;
     }
 
     .unit {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 18px;
-      padding: 16px 12px 14px;
+      padding: 22px 12px 18px;
       backdrop-filter: blur(10px);
-      box-shadow: 0 18px 48px rgba(255, 255, 255, 0.05);
-      text-align: center;
+      box-shadow: 0 20px 50px rgba(255, 255, 255, 0.04);
     }
 
     .value {
       display: block;
-      font-size: clamp(1.8rem, 5.4vw, 4rem);
+      font-size: clamp(2rem, 7vw, 4.8rem);
       line-height: 1;
       font-weight: 800;
       letter-spacing: 0.03em;
-      font-variant-numeric: tabular-nums;
     }
 
     .label {
       display: block;
-      margin-top: 8px;
-      font-size: 0.75rem;
+      margin-top: 10px;
+      font-size: 0.86rem;
       text-transform: uppercase;
-      letter-spacing: 0.22em;
+      letter-spacing: 0.18em;
       color: var(--muted);
     }
 
-    .hype {
-      margin: 12px 0 0;
-      text-align: center;
-      color: rgba(255, 255, 255, 0.84);
-      font-size: 0.96rem;
-      min-height: 1.3em;
-      letter-spacing: 0.03em;
+    .note {
+      margin-top: 22px;
+      color: rgba(255, 255, 255, 0.58);
+      font-size: 0.95rem;
     }
 
     .celebrate {
-      margin: 14px 0 0;
-      text-align: center;
-      display: none;
-      font-size: clamp(1.1rem, 2.5vw, 1.7rem);
-      letter-spacing: 0.09em;
+      margin-top: 26px;
+      font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      font-weight: 800;
+      font-weight: 700;
+      display: none;
     }
 
     .celebrate.show {
@@ -158,10 +114,6 @@
     }
 
     @media (max-width: 760px) {
-      .overlay {
-        padding: 14px;
-      }
-
       .timer {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
@@ -169,60 +121,57 @@
       .unit:nth-child(5) {
         grid-column: 1 / -1;
       }
-
-      .header {
-        border-radius: 18px;
-      }
     }
 
     @media (max-width: 460px) {
+      .wrap {
+        width: min(100vw - 20px, 100%);
+      }
+
       .timer {
+        grid-template-columns: 1fr 1fr;
         gap: 10px;
       }
 
       .unit {
-        padding: 14px 10px 12px;
+        padding: 18px 10px 14px;
         border-radius: 16px;
       }
     }
   </style>
 </head>
 <body>
-  <div id="scene" aria-hidden="true"></div>
+  <main class="wrap" aria-label="Rakshabandhan countdown timer">
+    <h1>Rakshabandhan</h1>
+    <p class="subtitle">A tiny countdown for big sibling energy.</p>
 
-  <main class="overlay" aria-label="Rakshabandhan countdown timer">
-    <header class="header">
-      <h1>Rakshabandhan</h1>
-      <p class="subtitle">A tiny countdown for big sibling energy.</p>
-    </header>
-
-    <section class="content">
-      <section class="timer" aria-live="polite">
-        <div class="unit">
-          <span class="value" id="weeks">00</span>
-          <span class="label">Weeks</span>
-        </div>
-        <div class="unit">
-          <span class="value" id="days">00</span>
-          <span class="label">Days</span>
-        </div>
-        <div class="unit">
-          <span class="value" id="hours">00</span>
-          <span class="label">Hours</span>
-        </div>
-        <div class="unit">
-          <span class="value" id="minutes">00</span>
-          <span class="label">Minutes</span>
-        </div>
-        <div class="unit">
-          <span class="value" id="seconds">00</span>
-          <span class="label">Seconds</span>
-        </div>
-      </section>
-
-      <p class="hype" id="hype">Loading sibling drama...</p>
-      <div class="celebrate" id="celebrate">Happy Rakshabandhan</div>
+    <section class="timer" aria-live="polite">
+      <div class="unit">
+        <span class="value" id="weeks">00</span>
+        <span class="label">Weeks</span>
+      </div>
+      <div class="unit">
+        <span class="value" id="days">00</span>
+        <span class="label">Days</span>
+      </div>
+      <div class="unit">
+        <span class="value" id="hours">00</span>
+        <span class="label">Hours</span>
+      </div>
+      <div class="unit">
+        <span class="value" id="minutes">00</span>
+        <span class="label">Minutes</span>
+      </div>
+      <div class="unit">
+        <span class="value" id="seconds">00</span>
+        <span class="label">Seconds</span>
+      </div>
     </section>
+
+    <p class="hype" id="hype">Loading sibling drama...</p>
+
+    <div class="celebrate" id="celebrate">Happy Rakshabandhan</div>
+    
   </main>
 
   <script>
@@ -257,10 +206,10 @@
       return String(value).padStart(2, '0');
     }
 
-    function renderCountdown() {
+    function render() {
       const now = new Date();
       const target = getTargetDate(now);
-      const remaining = target - now;
+      let remaining = target - now;
 
       if (remaining <= 0) {
         weeksEl.textContent = '00';
@@ -290,395 +239,8 @@
       hypeEl.textContent = hypeLines[totalSeconds % hypeLines.length];
     }
 
-    function createNativeScene() {
-      const container = document.getElementById('scene');
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      container.appendChild(canvas);
-
-      const state = {
-        width: 0,
-        height: 0,
-        pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
-        frame: 0,
-        stars: [],
-        swimmers: [],
-        particles: [],
-        bubbles: [],
-      };
-
-      function resize() {
-        state.width = window.innerWidth;
-        state.height = window.innerHeight;
-        canvas.width = Math.floor(state.width * state.pixelRatio);
-        canvas.height = Math.floor(state.height * state.pixelRatio);
-        canvas.style.width = state.width + 'px';
-        canvas.style.height = state.height + 'px';
-        ctx.setTransform(state.pixelRatio, 0, 0, state.pixelRatio, 0, 0);
-        buildStars();
-        buildSwimmers();
-      }
-
-      function buildStars() {
-        state.stars = [];
-        const count = Math.floor((state.width * state.height) / 1250);
-        for (let i = 0; i < count; i += 1) {
-          state.stars.push({
-            x: Math.random() * state.width,
-            y: Math.random() * state.height,
-            r: 0.4 + Math.random() * 1.4,
-            speed: 0.08 + Math.random() * 0.35,
-            twinkle: Math.random() * Math.PI * 2,
-          });
-        }
-      }
-
-      function buildSwimmers() {
-        state.swimmers = [];
-        const left = state.width * 0.06;
-        const spread = state.height * 0.7;
-        for (let i = 0; i < 14; i += 1) {
-          state.swimmers.push({
-            x: left + (Math.random() * state.width * 0.18),
-            y: state.height * 0.12 + (i / 13) * spread + (Math.random() * 14 - 7),
-            z: -0.28 + Math.random() * 0.56,
-            vx: 0.02 + Math.random() * 0.02,
-            vy: (Math.random() - 0.5) * 0.01,
-            vz: (Math.random() - 0.5) * 0.004,
-            phase: i * 0.75 + Math.random(),
-            size: 0.82 + Math.random() * 0.2,
-            reach: 0.7 + Math.random() * 0.35,
-            colorShift: Math.random(),
-            splash: 0,
-          });
-        }
-      }
-
-      function getHouseAnchor() {
-        return {
-          x: state.width * 0.88,
-          y: state.height * 0.5,
-        };
-      }
-
-      function drawRoundedRect(x, y, w, h, radius) {
-        const r = Math.min(radius, w / 2, h / 2);
-        ctx.beginPath();
-        ctx.moveTo(x + r, y);
-        ctx.arcTo(x + w, y, x + w, y + h, r);
-        ctx.arcTo(x + w, y + h, x, y + h, r);
-        ctx.arcTo(x, y + h, x, y, r);
-        ctx.arcTo(x, y, x + w, y, r);
-        ctx.closePath();
-      }
-
-      function updatePhysics() {
-        const dt = 1;
-        const anchor = getHouseAnchor();
-
-        state.swimmers.forEach((swimmer, index) => {
-          const lane = state.height * 0.14 + (index / 13) * state.height * 0.66;
-          const targetX = state.width * 0.2 + Math.sin(state.frame * 0.003 + swimmer.phase) * 8;
-          const accelX = (targetX - swimmer.x) * 0.00005;
-          const accelY = (lane - swimmer.y) * 0.00014 + Math.sin(state.frame * 0.008 + swimmer.phase) * 0.001;
-          swimmer.vx = (swimmer.vx + accelX) * 0.998;
-          swimmer.vy = (swimmer.vy + accelY) * 0.997;
-          swimmer.vz += Math.sin(state.frame * 0.005 + swimmer.phase) * 0.00003;
-          swimmer.vz *= 0.99;
-          swimmer.x += swimmer.vx * dt;
-          swimmer.y += swimmer.vy * dt;
-          swimmer.z += swimmer.vz * dt;
-
-          if (swimmer.x > state.width * 0.34) {
-            swimmer.x = state.width * 0.03 - Math.random() * 20;
-            swimmer.y = lane + (Math.random() * 24 - 12);
-            swimmer.vx = 0.02 + Math.random() * 0.02;
-            swimmer.splash = 2 + Math.random() * 4;
-          }
-
-          if (swimmer.splash > 0) {
-            swimmer.splash -= 0.35;
-          }
-
-          if (Math.random() < 0.03) {
-            state.particles.push({
-              x: swimmer.x - 24,
-              y: swimmer.y + 8,
-              vx: -0.01 - Math.random() * 0.05,
-              vy: -0.01 - Math.random() * 0.05,
-              life: 30 + Math.random() * 20,
-              size: 0.8 + Math.random() * 1.8,
-            });
-          }
-        });
-
-        state.particles = state.particles.filter((particle) => {
-          particle.vy += 0.015;
-          particle.x += particle.vx;
-          particle.y += particle.vy;
-          particle.life -= 1;
-          return particle.life > 0;
-        });
-
-        return { anchor };
-      }
-
-      function drawStars() {
-        for (const star of state.stars) {
-          star.twinkle += 0.02 + star.speed * 0.01;
-          const alpha = 0.35 + Math.sin(star.twinkle) * 0.35;
-          ctx.fillStyle = `rgba(255,255,255,${alpha})`;
-          ctx.beginPath();
-          ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
-          ctx.fill();
-          star.y += star.speed * 0.04;
-          if (star.y > state.height + 10) {
-            star.y = -10;
-            star.x = Math.random() * state.width;
-          }
-        }
-      }
-
-      function drawBackground() {
-        const gradient = ctx.createRadialGradient(
-          state.width * 0.5,
-          state.height * 0.35,
-          20,
-          state.width * 0.5,
-          state.height * 0.35,
-          Math.max(state.width, state.height) * 0.8
-        );
-        gradient.addColorStop(0, 'rgba(36,36,36,0.95)');
-        gradient.addColorStop(0.4, 'rgba(10,10,10,0.98)');
-        gradient.addColorStop(1, '#000000');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, state.width, state.height);
-
-        const vignette = ctx.createRadialGradient(
-          state.width * 0.5,
-          state.height * 0.5,
-          Math.min(state.width, state.height) * 0.12,
-          state.width * 0.5,
-          state.height * 0.5,
-          Math.max(state.width, state.height) * 0.72
-        );
-        vignette.addColorStop(0, 'rgba(255,255,255,0.05)');
-        vignette.addColorStop(1, 'rgba(0,0,0,0.2)');
-        ctx.fillStyle = vignette;
-        ctx.fillRect(0, 0, state.width, state.height);
-
-        const waveCount = 8;
-        for (let i = 0; i < waveCount; i += 1) {
-          const y = state.height * (0.14 + i * 0.11);
-          ctx.strokeStyle = `rgba(255,255,255,${0.02 + i * 0.004})`;
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          for (let x = 0; x <= state.width; x += 40) {
-            const offset = Math.sin(x * 0.01 + state.frame * 0.012 + i) * (4 + i);
-            if (x === 0) ctx.moveTo(x, y + offset);
-            else ctx.lineTo(x, y + offset);
-          }
-          ctx.stroke();
-        }
-      }
-
-      function drawPixelBlock(x, y, w, h, color) {
-        ctx.fillStyle = color;
-        ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
-      }
-
-      function drawHouse(anchor) {
-        const cx = state.width * 0.9;
-        const cy = state.height * 0.52;
-        const scale = 2.25;
-        const bodyW = 58 * scale;
-        const bodyH = 44 * scale;
-        const sway = Math.sin(state.frame * 0.01) * 1.2;
-
-        ctx.save();
-        ctx.imageSmoothingEnabled = false;
-
-        const glow = ctx.createRadialGradient(cx, cy - 16, 10, cx, cy - 16, 190);
-        glow.addColorStop(0, 'rgba(255, 214, 138, 0.42)');
-        glow.addColorStop(1, 'rgba(255, 214, 138, 0)');
-        ctx.fillStyle = glow;
-        ctx.beginPath();
-        ctx.arc(cx, cy - 16, 190, 0, Math.PI * 2);
-        ctx.fill();
-
-        const px = cx - bodyW / 2 + sway;
-        const py = cy - bodyH / 2;
-
-        drawPixelBlock(px, py, bodyW, bodyH, '#f0efe7');
-        drawPixelBlock(px - 12, py + 4, 12, bodyH - 8, '#d8d4cc');
-        drawPixelBlock(px + 8, py + 5, bodyW - 16, 8, '#f7f7f7');
-        drawPixelBlock(px + 8, py + bodyH - 13, bodyW - 16, 8, '#f7f7f7');
-        drawPixelBlock(px + 8, py + 13, bodyW - 16, bodyH - 26, '#fbfbfb');
-
-        drawPixelBlock(px + bodyW / 2 - 11, py - 18, 22, bodyH + 36, '#ff7aa8');
-        drawPixelBlock(px + bodyW / 2 - 9, py - 16, 18, bodyH + 32, '#ffd36a');
-        drawPixelBlock(px + bodyW / 2 - 6, py - 12, 12, bodyH + 24, '#ff9db9');
-        drawPixelBlock(px + bodyW / 2 - 22, py - 10, 44, 10, '#ffd36a');
-        drawPixelBlock(px + bodyW / 2 - 26, py + bodyH / 2 - 6, 52, 12, '#ff7aa8');
-
-        drawPixelBlock(cx - 8, py + 18, 16, 24, '#2f2f2f');
-        drawPixelBlock(cx - 36, py + 8, 8, 8, '#ffffff');
-        drawPixelBlock(cx + 28, py + 8, 8, 8, '#ffffff');
-        drawPixelBlock(cx - 36, py + 34, 8, 8, '#ffffff');
-        drawPixelBlock(cx + 28, py + 34, 8, 8, '#ffffff');
-        drawPixelBlock(cx - 50, py + 48, 16, 8, '#ffffff');
-        drawPixelBlock(cx + 34, py + 48, 16, 8, '#ffffff');
-
-        ctx.fillStyle = '#ffd36a';
-        ctx.shadowColor = 'rgba(255, 190, 70, 0.95)';
-        ctx.shadowBlur = 12;
-        ctx.beginPath();
-        ctx.arc(cx - 4, py + 34, 26, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#ff7ca8';
-        ctx.beginPath();
-        ctx.arc(cx - 4, py + 34, 12, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-
-        ctx.strokeStyle = '#ffd36a';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(cx - 34, py + 42);
-        ctx.lineTo(anchor.x - 8, anchor.y - 2);
-        ctx.moveTo(cx + 34, py + 42);
-        ctx.lineTo(anchor.x + 8, anchor.y + 2);
-        ctx.moveTo(cx - 10, py + 58);
-        ctx.lineTo(cx + 10, py + 58);
-        ctx.stroke();
-
-        ctx.restore();
-      }
-
-      function drawAstronaut(astro) {
-        const px = astro.x;
-        const py = astro.y;
-        const size = astro.size * (1 + astro.z * 0.04);
-        const drift = Math.sin(state.frame * 0.004 + astro.phase) * 1.2;
-        const bob = Math.sin(state.frame * 0.006 + astro.phase * 1.1) * 2.2;
-        const tilt = Math.sin(state.frame * 0.003 + astro.phase) * 0.08;
-
-        ctx.save();
-        ctx.translate(px + drift, py + bob);
-        ctx.rotate(tilt);
-        ctx.scale(1, 1 + astro.z * 0.02);
-
-        const glow = ctx.createRadialGradient(0, 0, 10, 0, 0, 74 * size);
-        glow.addColorStop(0, 'rgba(255,255,255,0.14)');
-        glow.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = glow;
-        ctx.beginPath();
-        ctx.arc(0, 2, 72 * size, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.imageSmoothingEnabled = false;
-        const suitW = 28 * size;
-        const suitH = 34 * size;
-        const headW = 20 * size;
-        const headH = 22 * size;
-        const arm = 10 * size;
-        const leg = 10 * size;
-
-        ctx.fillStyle = '#dfe6f3';
-        ctx.fillRect(Math.round(-suitW / 2), Math.round(-suitH / 2), Math.round(suitW), Math.round(suitH));
-        ctx.fillStyle = '#c8d1df';
-        ctx.fillRect(Math.round(-suitW / 2 + 2), Math.round(-suitH / 2 + 2), Math.round(4 * size), Math.round(suitH - 4));
-        ctx.fillStyle = '#f7fbff';
-        ctx.fillRect(Math.round(-suitW / 2 + 6), Math.round(-suitH / 2 + 5), Math.round(suitW - 12), Math.round(suitH - 10));
-        ctx.fillStyle = '#9eb0c9';
-        ctx.fillRect(Math.round(-suitW / 2 + 8), Math.round(-suitH / 2 + 12), Math.round(suitW - 16), Math.round(5 * size));
-        ctx.fillStyle = '#dce4ef';
-        ctx.fillRect(Math.round(-suitW / 2 + 5), Math.round(-suitH / 2 + 19), Math.round(suitW - 10), Math.round(7 * size));
-
-        ctx.fillStyle = '#f4f8ff';
-        ctx.fillRect(Math.round(-headW / 2), Math.round(-suitH / 2 - headH + 1), Math.round(headW), Math.round(headH));
-        ctx.fillStyle = '#d9e1ec';
-        ctx.fillRect(Math.round(-headW / 2 + 2), Math.round(-suitH / 2 - headH + 3), Math.round(headW - 4), Math.round(headH - 4));
-        ctx.fillStyle = '#89cfff';
-        ctx.fillRect(Math.round(-headW / 2 + 4), Math.round(-suitH / 2 - headH + 6), Math.round(headW - 8), Math.round(headH - 10));
-        ctx.fillStyle = '#21324a';
-        ctx.fillRect(Math.round(-headW / 2 + 5), Math.round(-suitH / 2 - headH + 10), Math.round(headW - 10), Math.round(7 * size));
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(Math.round(-2 * size), Math.round(-suitH / 2 - headH + 13), Math.round(4 * size), Math.round(4 * size));
-
-        ctx.fillStyle = '#edf4ff';
-        ctx.fillRect(Math.round(-suitW / 2 - arm), Math.round(-5 * size), Math.round(arm), Math.round(4 * size));
-        ctx.fillRect(Math.round(suitW / 2), Math.round(-4 * size), Math.round(arm), Math.round(4 * size));
-        ctx.fillRect(Math.round(-8 * size), Math.round(suitH / 2 - 1), Math.round(5 * size), Math.round(leg));
-        ctx.fillRect(Math.round(3 * size), Math.round(suitH / 2 - 1), Math.round(5 * size), Math.round(leg));
-
-        ctx.fillStyle = '#8e9db4';
-        ctx.fillRect(Math.round(-suitW / 2 - arm), Math.round(-5 * size), Math.round(3 * size), Math.round(4 * size));
-        ctx.fillRect(Math.round(suitW / 2 + arm - 3 * size), Math.round(-4 * size), Math.round(3 * size), Math.round(4 * size));
-        ctx.fillRect(Math.round(-8 * size), Math.round(suitH / 2 - 1 + leg - 4 * size), Math.round(5 * size), Math.round(4 * size));
-        ctx.fillRect(Math.round(3 * size), Math.round(suitH / 2 - 1 + leg - 4 * size), Math.round(5 * size), Math.round(4 * size));
-
-        ctx.fillStyle = '#ffcf66';
-        ctx.fillRect(Math.round(-suitW / 2 - 8 * size), Math.round(-1 * size), Math.round(3 * size), Math.round(2 * size));
-        ctx.fillRect(Math.round(suitW / 2 + 5 * size), Math.round(-1 * size), Math.round(3 * size), Math.round(2 * size));
-
-        if (astro.splash > 0) {
-          ctx.fillStyle = 'rgba(255,255,255,0.45)';
-          ctx.fillRect(Math.round(-28 * size), Math.round(20 * size), Math.round(8 + astro.splash), 2);
-          ctx.fillRect(Math.round(22 * size), Math.round(18 * size), Math.round(8 + astro.splash), 2);
-        }
-
-        ctx.restore();
-      }
-
-      function drawRakhiKnot() {
-        const anchor = getHouseAnchor();
-        const knotX = anchor.x - 12;
-        const knotY = anchor.y - 8;
-        ctx.save();
-        ctx.imageSmoothingEnabled = false;
-        ctx.shadowColor = 'rgba(255, 190, 70, 0.85)';
-        ctx.shadowBlur = 14;
-        drawPixelBlock(knotX - 11, knotY - 8, 22, 16, '#ffd36a');
-        drawPixelBlock(knotX - 8, knotY - 5, 16, 10, '#ff7aa8');
-        drawPixelBlock(knotX - 3, knotY - 2, 6, 6, '#fff2d5');
-        drawPixelBlock(knotX - 26, knotY - 2, 12, 4, '#ffd36a');
-        drawPixelBlock(knotX + 14, knotY - 2, 12, 4, '#ffd36a');
-        drawPixelBlock(knotX - 20, knotY + 4, 10, 3, '#ff9db9');
-        drawPixelBlock(knotX + 14, knotY + 4, 10, 3, '#ff9db9');
-        drawPixelBlock(knotX - 2, knotY + 9, 4, 10, '#ff7aa8');
-        ctx.restore();
-      }
-
-      function animate() {
-        state.frame += 1;
-        drawBackground();
-        drawStars();
-
-        const { anchor } = updatePhysics();
-        drawHouse(anchor);
-        drawRakhiKnot();
-
-        for (const particle of state.particles) {
-          ctx.fillStyle = `rgba(255,255,255,${Math.max(0, particle.life / 50) * 0.7})`;
-          ctx.beginPath();
-          ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        state.swimmers.forEach(drawAstronaut);
-
-        requestAnimationFrame(animate);
-      }
-
-      resize();
-      window.addEventListener('resize', resize);
-      animate();
-    }
-
-    renderCountdown();
-    setInterval(renderCountdown, 1000);
-    createNativeScene();
+    render();
+    setInterval(render, 1000);
   </script>
 </body>
 </html>
