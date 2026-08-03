@@ -38,6 +38,12 @@
       z-index: 0;
     }
 
+    #scene canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
     #scene::after {
       content: "";
       position: absolute;
@@ -219,7 +225,6 @@
     </section>
   </main>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r160/three.min.js"></script>
   <script>
     const weeksEl = document.getElementById('weeks');
     const daysEl = document.getElementById('days');
@@ -285,345 +290,299 @@
       hypeEl.textContent = hypeLines[totalSeconds % hypeLines.length];
     }
 
-    function createThreeScene() {
+    function createNativeScene() {
       const container = document.getElementById('scene');
-      const scene = new THREE.Scene();
-      scene.fog = new THREE.Fog(0x000000, 28, 92);
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      container.appendChild(canvas);
 
-      const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 220);
-      camera.position.set(0, 4.2, 13.5);
+      const state = {
+        width: 0,
+        height: 0,
+        pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+        frame: 0,
+        stars: [],
+      };
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.outputColorSpace = THREE.SRGBColorSpace;
-      container.appendChild(renderer.domElement);
-
-      const ambientLight = new THREE.AmbientLight(0xffffff, 2.0);
-      scene.add(ambientLight);
-
-      const keyLight = new THREE.DirectionalLight(0xffffff, 3.2);
-      keyLight.position.set(8, 14, 10);
-      scene.add(keyLight);
-
-      const rimLight = new THREE.DirectionalLight(0xfff0d6, 1.2);
-      rimLight.position.set(-10, 4, -8);
-      scene.add(rimLight);
-
-      const fillLight = new THREE.PointLight(0xffffff, 2.2, 45);
-      fillLight.position.set(0, 5, 10);
-      scene.add(fillLight);
-
-      const haloLight = new THREE.PointLight(0xffd48a, 1.8, 40);
-      haloLight.position.set(0, 2, 1.5);
-      scene.add(haloLight);
-
-      const backdropGlow = new THREE.Mesh(
-        new THREE.SphereGeometry(14, 32, 24),
-        new THREE.MeshBasicMaterial({ color: 0x111111, transparent: true, opacity: 0.95 })
-      );
-      backdropGlow.position.set(0, 2, -18);
-      scene.add(backdropGlow);
-
-      const starsGeometry = new THREE.BufferGeometry();
-      const starCount = 1800;
-      const starPositions = new Float32Array(starCount * 3);
-      for (let i = 0; i < starCount; i += 1) {
-        const radius = 80 + Math.random() * 90;
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos((Math.random() * 2) - 1);
-        const x = radius * Math.sin(phi) * Math.cos(theta);
-        const y = radius * Math.cos(phi);
-        const z = radius * Math.sin(phi) * Math.sin(theta);
-        starPositions[i * 3] = x;
-        starPositions[i * 3 + 1] = y;
-        starPositions[i * 3 + 2] = z;
+      function resize() {
+        state.width = window.innerWidth;
+        state.height = window.innerHeight;
+        canvas.width = Math.floor(state.width * state.pixelRatio);
+        canvas.height = Math.floor(state.height * state.pixelRatio);
+        canvas.style.width = state.width + 'px';
+        canvas.style.height = state.height + 'px';
+        ctx.setTransform(state.pixelRatio, 0, 0, state.pixelRatio, 0, 0);
+        buildStars();
       }
-      starsGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-      const starsMaterial = new THREE.PointsMaterial({
-        color: 0xffffff,
-        size: 0.24,
-        sizeAttenuation: true,
-        transparent: true,
-        opacity: 0.98,
-      });
-      const stars = new THREE.Points(starsGeometry, starsMaterial);
-      scene.add(stars);
 
-      const houseGroup = new THREE.Group();
-      houseGroup.position.set(0, -1.0, 0);
-      scene.add(houseGroup);
-
-      const houseHalo = new THREE.Mesh(
-        new THREE.SphereGeometry(6.2, 28, 20),
-        new THREE.MeshBasicMaterial({ color: 0xfff0d6, transparent: true, opacity: 0.05 })
-      );
-      houseHalo.position.set(0, 2, 0.2);
-      scene.add(houseHalo);
-
-      const houseBody = new THREE.Mesh(
-        new THREE.BoxGeometry(4.4, 2.8, 4.4),
-        new THREE.MeshStandardMaterial({
-          color: 0xf8f4ec,
-          roughness: 0.62,
-          metalness: 0.02,
-          emissive: 0x1a1a1a,
-          emissiveIntensity: 0.18,
-        })
-      );
-      houseBody.position.y = 1.4;
-      houseGroup.add(houseBody);
-
-      const roof = new THREE.Mesh(
-        new THREE.ConeGeometry(3.6, 2.2, 4),
-        new THREE.MeshStandardMaterial({
-          color: 0xffffff,
-          roughness: 0.55,
-          metalness: 0.03,
-          emissive: 0x181818,
-          emissiveIntensity: 0.12,
-        })
-      );
-      roof.position.y = 4.0;
-      roof.rotation.y = Math.PI * 0.25;
-      houseGroup.add(roof);
-
-      const door = new THREE.Mesh(
-        new THREE.BoxGeometry(0.9, 1.7, 0.18),
-        new THREE.MeshStandardMaterial({ color: 0x2e2e2e, roughness: 0.9 })
-      );
-      door.position.set(0, 0.85, 2.26);
-      houseGroup.add(door);
-
-      const windowMaterial = new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-        roughness: 0.4,
-        transparent: true,
-        opacity: 0.88,
-        emissive: 0xffffff,
-        emissiveIntensity: 0.22,
-      });
-      const windowGeo = new THREE.BoxGeometry(0.7, 0.7, 0.12);
-      const windowPositions = [
-        [-1.2, 2.0, 2.26],
-        [1.2, 2.0, 2.26],
-        [-1.2, 1.1, -2.26],
-        [1.2, 1.1, -2.26],
-      ];
-      windowPositions.forEach(([x, y, z]) => {
-        const win = new THREE.Mesh(windowGeo, windowMaterial);
-        win.position.set(x, y, z);
-        if (z < 0) {
-          win.rotation.y = Math.PI;
+      function buildStars() {
+        state.stars = [];
+        const count = Math.floor((state.width * state.height) / 1400);
+        for (let i = 0; i < count; i += 1) {
+          state.stars.push({
+            x: Math.random() * state.width,
+            y: Math.random() * state.height,
+            r: 0.4 + Math.random() * 1.4,
+            speed: 0.08 + Math.random() * 0.35,
+            twinkle: Math.random() * Math.PI * 2,
+          });
         }
-        houseGroup.add(win);
-      });
-
-      const groundGlow = new THREE.Mesh(
-        new THREE.CircleGeometry(9, 48),
-        new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.08 })
-      );
-      groundGlow.rotation.x = -Math.PI / 2;
-      groundGlow.position.y = -0.4;
-      scene.add(groundGlow);
-
-      const rakhiBand = new THREE.Mesh(
-        new THREE.TorusGeometry(2.25, 0.13, 18, 160),
-        new THREE.MeshStandardMaterial({
-          color: 0xffd26a,
-          roughness: 0.3,
-          metalness: 0.25,
-          emissive: 0xffb84d,
-          emissiveIntensity: 0.55,
-        })
-      );
-      rakhiBand.position.set(0, 1.55, 2.18);
-      rakhiBand.rotation.x = Math.PI / 2;
-      houseGroup.add(rakhiBand);
-
-      const rakhiKnot = new THREE.Mesh(
-        new THREE.SphereGeometry(0.22, 20, 16),
-        new THREE.MeshStandardMaterial({
-          color: 0xff7aa8,
-          roughness: 0.35,
-          metalness: 0.2,
-          emissive: 0xff4d7d,
-          emissiveIntensity: 0.45,
-        })
-      );
-      rakhiKnot.position.set(0, 1.55, 2.35);
-      houseGroup.add(rakhiKnot);
-
-      const rakhiTailGeo = new THREE.CylinderGeometry(0.05, 0.05, 1.0, 8);
-      const rakhiTailMaterial = new THREE.MeshStandardMaterial({
-        color: 0xffd26a,
-        roughness: 0.3,
-        metalness: 0.12,
-        emissive: 0xffb84d,
-        emissiveIntensity: 0.4,
-      });
-      const tailLeft = new THREE.Mesh(rakhiTailGeo, rakhiTailMaterial);
-      tailLeft.position.set(-0.34, 1.0, 2.46);
-      tailLeft.rotation.z = 0.45;
-      houseGroup.add(tailLeft);
-
-      const tailRight = new THREE.Mesh(rakhiTailGeo, rakhiTailMaterial);
-      tailRight.position.set(0.34, 1.0, 2.46);
-      tailRight.rotation.z = -0.45;
-      houseGroup.add(tailRight);
-
-      function createFigure() {
-        const figure = new THREE.Group();
-        const white = new THREE.MeshStandardMaterial({
-          color: 0xffffff,
-          roughness: 0.42,
-          metalness: 0.08,
-          emissive: 0x161616,
-          emissiveIntensity: 0.15,
-        });
-        const softGray = new THREE.MeshStandardMaterial({
-          color: 0xe9e9e9,
-          roughness: 0.52,
-          metalness: 0.02,
-          emissive: 0x101010,
-          emissiveIntensity: 0.08,
-        });
-
-        const head = new THREE.Mesh(new THREE.SphereGeometry(0.28, 20, 16), white);
-        head.position.y = 1.55;
-        figure.add(head);
-
-        const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.3, 0.92, 14), softGray);
-        torso.position.y = 0.9;
-        torso.rotation.z = 0.08;
-        figure.add(torso);
-
-        const hip = new THREE.Mesh(new THREE.SphereGeometry(0.16, 14, 10), white);
-        hip.position.y = 0.38;
-        figure.add(hip);
-
-        const armGeo = new THREE.CylinderGeometry(0.06, 0.08, 0.8, 10);
-        const legGeo = new THREE.CylinderGeometry(0.07, 0.09, 0.88, 10);
-
-        const leftArm = new THREE.Mesh(armGeo, white);
-        leftArm.position.set(-0.33, 1.08, 0);
-        leftArm.rotation.z = 0.95;
-        figure.add(leftArm);
-
-        const rightArm = new THREE.Mesh(armGeo, white);
-        rightArm.position.set(0.33, 1.08, 0);
-        rightArm.rotation.z = -1.0;
-        figure.add(rightArm);
-
-        const leftLeg = new THREE.Mesh(legGeo, softGray);
-        leftLeg.position.set(-0.12, -0.17, 0);
-        leftLeg.rotation.z = 0.2;
-        figure.add(leftLeg);
-
-        const rightLeg = new THREE.Mesh(legGeo, softGray);
-        rightLeg.position.set(0.12, -0.17, 0);
-        rightLeg.rotation.z = -0.18;
-        figure.add(rightLeg);
-
-        const ankleGlow = new THREE.Mesh(
-          new THREE.SphereGeometry(0.09, 10, 8),
-          new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.38 })
-        );
-        ankleGlow.position.y = -0.6;
-        figure.add(ankleGlow);
-
-        return { figure, leftArm, rightArm };
       }
 
-      const figures = [];
-      const figureCount = 14;
-      for (let i = 0; i < figureCount; i += 1) {
-        const { figure, leftArm, rightArm } = createFigure();
-        const angle = (i / figureCount) * Math.PI * 2;
-        const radius = 6.4 + (i % 3) * 0.55;
-        figure.userData = {
-          angle,
-          radius: radius + 0.8,
-          height: 0.15 + (i % 4) * 0.18,
-          speed: 0.08 + (i % 5) * 0.016,
-          phase: i * 0.6,
+      function project(x, y, z) {
+        const cameraDistance = 22;
+        const scale = cameraDistance / (cameraDistance - z);
+        return {
+          x: state.width / 2 + x * scale * 34,
+          y: state.height / 2 + y * scale * 34,
+          scale,
+          depth: z,
         };
-        figure.position.set(
-          Math.cos(angle) * (radius + 0.8),
-          0,
-          Math.sin(angle) * (radius + 0.8)
-        );
-        figure.lookAt(0, 1.1, 0);
-        scene.add(figure);
-        figures.push({ figure, leftArm, rightArm });
       }
 
-      const ring = new THREE.Mesh(
-        new THREE.TorusGeometry(7.6, 0.06, 8, 120),
-        new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.18 })
-      );
-      ring.rotation.x = Math.PI / 2;
-      ring.position.y = -0.25;
-      scene.add(ring);
+      function drawRoundedRect(x, y, w, h, radius) {
+        const r = Math.min(radius, w / 2, h / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+      }
 
-      let frame = 0;
+      function drawStars() {
+        for (const star of state.stars) {
+          star.twinkle += 0.02 + star.speed * 0.01;
+          const alpha = 0.35 + Math.sin(star.twinkle) * 0.35;
+          ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+          ctx.beginPath();
+          ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+          ctx.fill();
+          star.y += star.speed * 0.04;
+          if (star.y > state.height + 10) {
+            star.y = -10;
+            star.x = Math.random() * state.width;
+          }
+        }
+      }
+
+      function drawBackground() {
+        const gradient = ctx.createRadialGradient(
+          state.width * 0.5,
+          state.height * 0.35,
+          20,
+          state.width * 0.5,
+          state.height * 0.35,
+          Math.max(state.width, state.height) * 0.8
+        );
+        gradient.addColorStop(0, 'rgba(36,36,36,0.95)');
+        gradient.addColorStop(0.4, 'rgba(10,10,10,0.98)');
+        gradient.addColorStop(1, '#000000');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, state.width, state.height);
+
+        const vignette = ctx.createRadialGradient(
+          state.width * 0.5,
+          state.height * 0.5,
+          Math.min(state.width, state.height) * 0.12,
+          state.width * 0.5,
+          state.height * 0.5,
+          Math.max(state.width, state.height) * 0.72
+        );
+        vignette.addColorStop(0, 'rgba(255,255,255,0.05)');
+        vignette.addColorStop(1, 'rgba(0,0,0,0.2)');
+        ctx.fillStyle = vignette;
+        ctx.fillRect(0, 0, state.width, state.height);
+      }
+
+      function drawHouse() {
+        const cx = state.width * 0.5;
+        const cy = state.height * 0.46;
+        const bodyW = 190;
+        const bodyH = 150;
+        const depth = 20;
+        const sway = Math.sin(state.frame * 0.014) * 4;
+        const glow = ctx.createRadialGradient(cx, cy - 8, 10, cx, cy - 8, 170);
+        glow.addColorStop(0, 'rgba(255, 214, 138, 0.28)');
+        glow.addColorStop(1, 'rgba(255, 214, 138, 0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(cx, cy - 10, 170, 0, Math.PI * 2);
+        ctx.fill();
+
+        const shadow = ctx.createRadialGradient(cx, cy + 70, 10, cx, cy + 70, 160);
+        shadow.addColorStop(0, 'rgba(255,255,255,0.07)');
+        shadow.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = shadow;
+        ctx.beginPath();
+        ctx.arc(cx, cy + 66, 150, 0, Math.PI * 2);
+        ctx.fill();
+
+        const px = cx - bodyW / 2 + sway;
+        const py = cy - bodyH / 2;
+
+        ctx.fillStyle = 'rgba(230,230,230,0.92)';
+        drawRoundedRect(px, py, bodyW, bodyH, 10);
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(255,255,255,0.18)';
+        drawRoundedRect(px - depth * 0.45, py + 8, depth, bodyH - 16, 8);
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(255,255,255,0.16)';
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(px + bodyW, py);
+        ctx.lineTo(px + bodyW - 22, py - 42);
+        ctx.lineTo(px + 20, py - 42);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(255,255,255,0.96)';
+        ctx.beginPath();
+        ctx.moveTo(px - 14, py);
+        ctx.lineTo(px + bodyW / 2, py - 64);
+        ctx.lineTo(px + bodyW + 14, py);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(40,40,40,0.92)';
+        drawRoundedRect(cx - 16, py + 65, 32, 72, 8);
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(255,255,255,0.92)';
+        drawRoundedRect(cx - 72, py + 34, 24, 24, 4);
+        drawRoundedRect(cx + 48, py + 34, 24, 24, 4);
+        drawRoundedRect(cx - 72, py + 82, 24, 24, 4);
+        drawRoundedRect(cx + 48, py + 82, 24, 24, 4);
+        ctx.fill();
+
+        const bandY = py + 78;
+        const bandX = cx;
+        ctx.save();
+        ctx.translate(bandX, bandY);
+        ctx.scale(1.1, 1);
+        ctx.strokeStyle = 'rgba(255, 210, 106, 0.95)';
+        ctx.lineWidth = 11;
+        ctx.shadowColor = 'rgba(255, 190, 70, 0.9)';
+        ctx.shadowBlur = 16;
+        ctx.beginPath();
+        ctx.arc(0, 0, 47, Math.PI * 0.1, Math.PI * 0.9);
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(255, 124, 164, 0.95)';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.arc(0, 0, 47, Math.PI * 0.98, Math.PI * 1.32);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(255, 124, 164, 0.95)';
+        ctx.beginPath();
+        ctx.arc(0, 2, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        ctx.strokeStyle = 'rgba(255, 210, 106, 0.8)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(cx - 46, bandY + 2);
+        ctx.lineTo(cx - 72, bandY + 30);
+        ctx.moveTo(cx + 46, bandY + 2);
+        ctx.lineTo(cx + 74, bandY + 24);
+        ctx.stroke();
+      }
+
+      function drawFigure(figure) {
+        const depth = figure.z;
+        const base = project(figure.x, figure.y, depth);
+        const scale = base.scale * figure.scale;
+        const bob = Math.sin(state.frame * 0.035 + figure.phase) * 3.5;
+        const x = base.x;
+        const y = base.y + bob;
+
+        const bodyW = 14 * scale;
+        const bodyH = 30 * scale;
+        const headR = 8 * scale;
+        const armLen = 18 * scale;
+        const legLen = 20 * scale;
+
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.globalAlpha = 0.82 + Math.max(0, 0.12 - depth * 0.01);
+        ctx.lineCap = 'round';
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+        ctx.lineWidth = Math.max(1.2, 2.4 * scale);
+        ctx.beginPath();
+        ctx.arc(0, -bodyH - headR * 0.8, headR, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(230,230,230,0.78)';
+        ctx.lineWidth = Math.max(1.2, 3.2 * scale);
+        ctx.beginPath();
+        ctx.moveTo(0, -bodyH);
+        ctx.lineTo(0, 0);
+        ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+        ctx.lineWidth = Math.max(1.1, 2.2 * scale);
+        ctx.beginPath();
+        ctx.moveTo(0, -bodyH * 0.72);
+        ctx.lineTo(-armLen * 0.72, -bodyH * 0.35);
+        ctx.moveTo(0, -bodyH * 0.72);
+        ctx.lineTo(armLen * 0.86, -bodyH * 0.32);
+        ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(220,220,220,0.72)';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-legLen * 0.45, legLen * 0.95);
+        ctx.moveTo(0, 0);
+        ctx.lineTo(legLen * 0.55, legLen * 0.9);
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(255,255,255,0.16)';
+        ctx.beginPath();
+        ctx.arc(0, -bodyH - headR * 0.8, headR + 3 * scale, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
 
       function animate() {
-        frame += 0.01;
+        state.frame += 1;
+        drawBackground();
+        drawStars();
 
-        stars.rotation.y += 0.00055;
-        stars.rotation.x = Math.sin(frame * 0.12) * 0.04;
-        houseGroup.rotation.y = Math.sin(frame * 0.18) * 0.06;
-        houseGroup.position.y = -1.0 + Math.sin(frame * 0.9) * 0.05;
-        roof.rotation.y += 0.0012;
-        houseHalo.scale.setScalar(1 + Math.sin(frame * 0.8) * 0.03);
-        rakhiBand.rotation.z = Math.sin(frame * 0.7) * 0.03;
-        rakhiKnot.rotation.y += 0.01;
+        const figures = [];
+        for (let i = 0; i < 14; i += 1) {
+          const angle = (i / 14) * Math.PI * 2 + state.frame * 0.0035;
+          const radius = 5.2 + (i % 3) * 0.45;
+          const height = Math.sin(state.frame * 0.02 + i) * 0.55 + (i % 4) * 0.25;
+          figures.push({
+            x: Math.cos(angle) * radius,
+            y: height + 0.2,
+            z: Math.sin(angle) * radius,
+            scale: 1.0 + (i % 4) * 0.04,
+            phase: i * 0.75,
+          });
+        }
 
-        figures.forEach((entry, index) => {
-          const { figure, leftArm, rightArm } = entry;
-          const data = figure.userData;
-          const bob = Math.sin(frame * 2 + data.phase) * 0.26;
-          const orbit = data.angle + frame * data.speed;
-          const radius = data.radius + Math.sin(frame * 1.5 + data.phase) * 0.14;
-          const sway = Math.sin(frame * 1.2 + data.phase) * 0.16;
+        figures.sort((a, b) => a.z - b.z);
+        drawHouse();
+        figures.forEach(drawFigure);
 
-          figure.position.x = Math.cos(orbit) * radius;
-          figure.position.z = Math.sin(orbit) * radius;
-          figure.position.y = bob + data.height;
-
-          figure.lookAt(0, 1.1, 0);
-          figure.rotation.z = Math.sin(frame * 1.8 + data.phase) * 0.08;
-
-          leftArm.rotation.z = 0.9 + Math.sin(frame * 1.9 + data.phase) * 0.2;
-          rightArm.rotation.z = -0.95 + Math.cos(frame * 2.1 + data.phase) * 0.2;
-          figure.position.x += sway * 0.15;
-
-          const scale = 1.15 + ((index % 4) * 0.03);
-          figure.scale.setScalar(scale);
-        });
-
-        camera.position.x = Math.sin(frame * 0.25) * 0.35;
-        camera.position.y = 4.2 + Math.cos(frame * 0.22) * 0.12;
-        camera.lookAt(0, 1, 0);
-
-        renderer.render(scene, camera);
         requestAnimationFrame(animate);
       }
 
+      resize();
+      window.addEventListener('resize', resize);
       animate();
-
-      window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      });
     }
 
     renderCountdown();
     setInterval(renderCountdown, 1000);
-    createThreeScene();
+    createNativeScene();
   </script>
 </body>
 </html>
