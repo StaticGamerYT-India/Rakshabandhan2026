@@ -305,6 +305,7 @@
         swimmers: [],
         rope: [],
         particles: [],
+        bubbles: [],
       };
 
       function resize() {
@@ -336,19 +337,19 @@
 
       function buildSwimmers() {
         state.swimmers = [];
-        const left = state.width * 0.08;
-        const spread = state.height * 0.64;
+        const left = state.width * 0.06;
+        const spread = state.height * 0.7;
         for (let i = 0; i < 14; i += 1) {
           state.swimmers.push({
-            x: left + (Math.random() * state.width * 0.28),
-            y: state.height * 0.18 + (i / 13) * spread + (Math.random() * 18 - 9),
-            z: -0.35 + Math.random() * 0.7,
-            vx: 0.55 + Math.random() * 0.65,
-            vy: (Math.random() - 0.5) * 0.18,
-            vz: (Math.random() - 0.5) * 0.03,
+            x: left + (Math.random() * state.width * 0.18),
+            y: state.height * 0.12 + (i / 13) * spread + (Math.random() * 14 - 7),
+            z: -0.28 + Math.random() * 0.56,
+            vx: 0.12 + Math.random() * 0.1,
+            vy: (Math.random() - 0.5) * 0.04,
+            vz: (Math.random() - 0.5) * 0.01,
             phase: i * 0.75 + Math.random(),
-            size: 0.78 + Math.random() * 0.28,
-            reach: 0.75 + Math.random() * 0.45,
+            size: 0.82 + Math.random() * 0.2,
+            reach: 0.7 + Math.random() * 0.35,
             colorShift: Math.random(),
             splash: 0,
           });
@@ -356,11 +357,11 @@
       }
 
       function buildRope() {
-        const segmentCount = 44;
+        const segmentCount = 56;
         state.rope = [];
         const anchor = getHouseAnchor();
-        const startX = state.width * 0.36;
-        const startY = state.height * 0.41;
+        const startX = state.width * 0.28;
+        const startY = state.height * 0.44;
         for (let i = 0; i < segmentCount; i += 1) {
           const t = i / (segmentCount - 1);
           state.rope.push({
@@ -376,8 +377,8 @@
 
       function getHouseAnchor() {
         return {
-          x: state.width * 0.79,
-          y: state.height * 0.47,
+          x: state.width * 0.88,
+          y: state.height * 0.5,
         };
       }
 
@@ -399,26 +400,26 @@
       function updatePhysics() {
         const dt = 1;
         const anchor = getHouseAnchor();
-        const ropeAnchor = { x: state.width * 0.68, y: state.height * 0.42 };
+        const ropeAnchor = { x: state.width * 0.74, y: state.height * 0.46 };
 
         state.swimmers.forEach((swimmer, index) => {
-          const lane = state.height * 0.16 + (index / 13) * state.height * 0.58;
-          const targetX = state.width * 0.56 + Math.sin(state.frame * 0.012 + swimmer.phase) * 34;
-          const accelX = (targetX - swimmer.x) * 0.0009;
-          const accelY = (lane - swimmer.y) * 0.0012 + Math.sin(state.frame * 0.05 + swimmer.phase) * 0.02;
-          swimmer.vx = (swimmer.vx + accelX) * 0.992;
-          swimmer.vy = (swimmer.vy + accelY) * 0.988;
-          swimmer.vz += Math.sin(state.frame * 0.02 + swimmer.phase) * 0.0006;
-          swimmer.vz *= 0.96;
+          const lane = state.height * 0.14 + (index / 13) * state.height * 0.66;
+          const targetX = state.width * 0.22 + Math.sin(state.frame * 0.008 + swimmer.phase) * 22;
+          const accelX = (targetX - swimmer.x) * 0.00018;
+          const accelY = (lane - swimmer.y) * 0.00055 + Math.sin(state.frame * 0.018 + swimmer.phase) * 0.004;
+          swimmer.vx = (swimmer.vx + accelX) * 0.996;
+          swimmer.vy = (swimmer.vy + accelY) * 0.993;
+          swimmer.vz += Math.sin(state.frame * 0.01 + swimmer.phase) * 0.00015;
+          swimmer.vz *= 0.97;
           swimmer.x += swimmer.vx * dt;
           swimmer.y += swimmer.vy * dt;
           swimmer.z += swimmer.vz * dt;
 
-          if (swimmer.x > state.width * 0.58) {
-            swimmer.x = state.width * 0.08 - Math.random() * 40;
+          if (swimmer.x > state.width * 0.34) {
+            swimmer.x = state.width * 0.04 - Math.random() * 30;
             swimmer.y = lane + (Math.random() * 24 - 12);
-            swimmer.vx = 0.55 + Math.random() * 0.5;
-            swimmer.splash = 8 + Math.random() * 12;
+            swimmer.vx = 0.12 + Math.random() * 0.08;
+            swimmer.splash = 4 + Math.random() * 8;
           }
 
           if (swimmer.splash > 0) {
@@ -429,8 +430,8 @@
             state.particles.push({
               x: swimmer.x - 24,
               y: swimmer.y + 8,
-              vx: -0.25 - Math.random() * 0.4,
-              vy: -0.2 - Math.random() * 0.3,
+              vx: -0.05 - Math.random() * 0.16,
+              vy: -0.04 - Math.random() * 0.12,
               life: 30 + Math.random() * 20,
               size: 0.8 + Math.random() * 1.8,
             });
@@ -440,8 +441,8 @@
         for (let i = 0; i < state.rope.length; i += 1) {
           const point = state.rope[i];
           if (i === 0) {
-            point.x = state.width * 0.34 + Math.sin(state.frame * 0.015) * 10;
-            point.y = state.height * 0.42 + Math.sin(state.frame * 0.02) * 6;
+            point.x = state.width * 0.28 + Math.sin(state.frame * 0.014) * 8;
+            point.y = state.height * 0.44 + Math.sin(state.frame * 0.018) * 5;
             continue;
           }
           if (i === state.rope.length - 1) {
@@ -450,24 +451,24 @@
             continue;
           }
 
-          point.vy += 0.18 * dt;
-          point.vx += Math.sin(state.frame * 0.08 + i * 0.32) * 0.02;
-          point.vx *= 0.985;
-          point.vy *= 0.985;
+          point.vy += 0.08 * dt;
+          point.vx += Math.sin(state.frame * 0.04 + i * 0.18) * 0.008;
+          point.vx *= 0.99;
+          point.vy *= 0.989;
           point.x += point.vx;
           point.y += point.vy;
         }
 
-        for (let iter = 0; iter < 8; iter += 1) {
+        for (let iter = 0; iter < 10; iter += 1) {
           for (let i = 0; i < state.rope.length - 1; i += 1) {
             const a = state.rope[i];
             const b = state.rope[i + 1];
             const dx = b.x - a.x;
             const dy = b.y - a.y;
             const dist = Math.max(0.0001, Math.hypot(dx, dy));
-            const rest = lerp(10.5, 14.5, i / (state.rope.length - 1));
+            const rest = lerp(8.5, 13.5, i / (state.rope.length - 1));
             const diff = (dist - rest) / dist;
-            const stiffness = 0.34;
+            const stiffness = 0.42;
             const offsetX = dx * diff * stiffness;
             const offsetY = dy * diff * stiffness;
 
@@ -552,185 +553,199 @@
         }
       }
 
+      function drawPixelBlock(x, y, w, h, color) {
+        ctx.fillStyle = color;
+        ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+      }
+
       function drawHouse(anchor) {
-        const cx = state.width * 0.79;
-        const cy = state.height * 0.5;
-        const bodyW = 220;
-        const bodyH = 168;
-        const depth = 26;
-        const sway = Math.sin(state.frame * 0.014) * 3;
-        const glow = ctx.createRadialGradient(cx, cy - 10, 18, cx, cy - 10, 210);
-        glow.addColorStop(0, 'rgba(255, 214, 138, 0.42)');
+        const cx = state.width * 0.88;
+        const cy = state.height * 0.52;
+        const scale = 2.1;
+        const bodyW = 56 * scale;
+        const bodyH = 42 * scale;
+        const roofH = 30 * scale;
+        const sway = Math.sin(state.frame * 0.014) * 2;
+
+        ctx.save();
+        ctx.imageSmoothingEnabled = false;
+
+        const glow = ctx.createRadialGradient(cx, cy - 16, 10, cx, cy - 16, 170);
+        glow.addColorStop(0, 'rgba(255, 214, 138, 0.34)');
         glow.addColorStop(1, 'rgba(255, 214, 138, 0)');
         ctx.fillStyle = glow;
         ctx.beginPath();
-        ctx.arc(cx, cy - 6, 210, 0, Math.PI * 2);
-        ctx.fill();
-
-        const shadow = ctx.createRadialGradient(cx, cy + 86, 18, cx, cy + 86, 190);
-        shadow.addColorStop(0, 'rgba(255,255,255,0.09)');
-        shadow.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = shadow;
-        ctx.beginPath();
-        ctx.arc(cx, cy + 78, 180, 0, Math.PI * 2);
+        ctx.arc(cx, cy - 16, 170, 0, Math.PI * 2);
         ctx.fill();
 
         const px = cx - bodyW / 2 + sway;
         const py = cy - bodyH / 2;
 
-        ctx.fillStyle = 'rgba(238,236,230,0.96)';
-        drawRoundedRect(px, py, bodyW, bodyH, 12);
-        ctx.fill();
+        drawPixelBlock(px, py, bodyW, bodyH, '#f0efe7');
+        drawPixelBlock(px - 10, py + 4, 10, bodyH - 8, '#d9d6ce');
+        drawPixelBlock(px + 8, py - roofH, bodyW - 16, 10, '#ffffff');
+        drawPixelBlock(px + 20, py - roofH + 8, bodyW - 40, 12, '#f2f2f2');
+        drawPixelBlock(px + 14, py - roofH + 20, bodyW - 28, 12, '#f8f8f8');
+        drawPixelBlock(px + 26, py - roofH - 10, bodyW - 52, 10, '#ffffff');
 
-        ctx.fillStyle = 'rgba(255,255,255,0.16)';
-        drawRoundedRect(px - depth * 0.45, py + 10, depth, bodyH - 18, 10);
-        ctx.fill();
+        drawPixelBlock(cx - 8, py + 16, 16, 24, '#2f2f2f');
+        drawPixelBlock(cx - 32, py + 8, 8, 8, '#ffffff');
+        drawPixelBlock(cx + 24, py + 8, 8, 8, '#ffffff');
+        drawPixelBlock(cx - 32, py + 32, 8, 8, '#ffffff');
+        drawPixelBlock(cx + 24, py + 32, 8, 8, '#ffffff');
+        drawPixelBlock(cx - 48, py + 44, 16, 8, '#ffffff');
+        drawPixelBlock(cx + 32, py + 44, 16, 8, '#ffffff');
 
-        ctx.fillStyle = 'rgba(255,255,255,0.18)';
-        ctx.beginPath();
-        ctx.moveTo(px, py);
-        ctx.lineTo(px + bodyW, py);
-        ctx.lineTo(px + bodyW - 32, py - 52);
-        ctx.lineTo(px + 26, py - 52);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.fillStyle = 'rgba(255,255,255,0.98)';
-        ctx.beginPath();
-        ctx.moveTo(px - 18, py);
-        ctx.lineTo(px + bodyW / 2, py - 74);
-        ctx.lineTo(px + bodyW + 18, py);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.fillStyle = 'rgba(42,42,42,0.94)';
-        drawRoundedRect(cx - 18, py + 74, 36, 80, 9);
-        ctx.fill();
-
-        ctx.fillStyle = 'rgba(255,255,255,0.94)';
-        drawRoundedRect(cx - 84, py + 38, 28, 28, 5);
-        drawRoundedRect(cx + 56, py + 38, 28, 28, 5);
-        drawRoundedRect(cx - 84, py + 94, 28, 28, 5);
-        drawRoundedRect(cx + 56, py + 94, 28, 28, 5);
-        ctx.fill();
-
-        ctx.save();
-        ctx.translate(cx, py + 90);
-        ctx.scale(1.2, 1);
-        ctx.strokeStyle = 'rgba(255, 210, 106, 0.95)';
-        ctx.lineWidth = 14;
+        ctx.fillStyle = '#ffd36a';
         ctx.shadowColor = 'rgba(255, 190, 70, 0.95)';
-        ctx.shadowBlur = 20;
+        ctx.shadowBlur = 12;
         ctx.beginPath();
-        ctx.arc(0, 0, 58, Math.PI * 0.08, Math.PI * 0.92);
-        ctx.stroke();
-        ctx.strokeStyle = 'rgba(255, 124, 164, 0.96)';
-        ctx.lineWidth = 7;
-        ctx.beginPath();
-        ctx.arc(0, 0, 58, Math.PI * 0.96, Math.PI * 1.34);
-        ctx.stroke();
-        ctx.fillStyle = 'rgba(255, 124, 164, 0.96)';
-        ctx.beginPath();
-        ctx.arc(0, 2, 12, 0, Math.PI * 2);
+        ctx.arc(cx - 4, py + 30, 24, 0, Math.PI * 2);
         ctx.fill();
-        ctx.restore();
+        ctx.fillStyle = '#ff7ca8';
+        ctx.beginPath();
+        ctx.arc(cx - 4, py + 30, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
 
-        ctx.strokeStyle = 'rgba(255, 210, 106, 0.82)';
+        ctx.strokeStyle = '#ffd36a';
         ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.moveTo(cx - 58, py + 92);
-        ctx.lineTo(anchor.x + 12, anchor.y - 8);
-        ctx.moveTo(cx + 58, py + 92);
-        ctx.lineTo(anchor.x + 24, anchor.y + 10);
+        ctx.moveTo(cx - 26, py + 36);
+        ctx.lineTo(anchor.x - 8, anchor.y - 2);
+        ctx.moveTo(cx + 26, py + 36);
+        ctx.lineTo(anchor.x + 8, anchor.y + 2);
         ctx.stroke();
+
+        ctx.restore();
       }
 
-      function drawSwimmer(swimmer) {
-        const perspective = 1.08 + swimmer.z * 0.12;
-        const x = swimmer.x;
-        const y = swimmer.y;
-        const bodyW = 66 * swimmer.size * perspective;
-        const bodyH = 22 * swimmer.size * perspective;
-        const headR = 12 * swimmer.size * perspective;
-        const armSwing = Math.sin(state.frame * 0.08 + swimmer.phase) * 0.95;
-        const legSwing = Math.sin(state.frame * 0.1 + swimmer.phase + 1.5) * 0.9;
-        const waterGlow = swimmer.splash > 0 ? 0.35 : 0.15;
+      function drawAstronaut(astro) {
+        const px = astro.x;
+        const py = astro.y;
+        const size = astro.size * (1 + astro.z * 0.04);
+        const floatOffset = Math.sin(state.frame * 0.008 + astro.phase) * 6;
+        const drift = Math.sin(state.frame * 0.005 + astro.phase) * 1.2;
+        const bob = Math.sin(state.frame * 0.01 + astro.phase * 1.3) * 3.5;
+        const hue = astro.colorShift > 0.5 ? '#f4f7ff' : '#eef1f7';
 
         ctx.save();
-        ctx.translate(x, y);
-        ctx.scale(1, 1 + swimmer.z * 0.05);
+        ctx.translate(px + drift, py + bob);
+        ctx.scale(1, 1 + astro.z * 0.05);
 
-        const glow = ctx.createRadialGradient(0, 0, 8, 0, 0, 56 * swimmer.size);
-        glow.addColorStop(0, `rgba(255,255,255,${0.14 + waterGlow})`);
+        const glow = ctx.createRadialGradient(0, 0, 10, 0, 0, 74 * size);
+        glow.addColorStop(0, 'rgba(255,255,255,0.18)');
         glow.addColorStop(1, 'rgba(255,255,255,0)');
         ctx.fillStyle = glow;
         ctx.beginPath();
-        ctx.ellipse(0, 0, 56 * swimmer.size, 30 * swimmer.size, 0, 0, Math.PI * 2);
+        ctx.arc(0, 2, 72 * size, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = 'rgba(255,255,255,0.9)';
-        ctx.beginPath();
-        ctx.ellipse(-10 * swimmer.size, -18 * swimmer.size, headR * 1.04, headR * 1.18, -0.15, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.imageSmoothingEnabled = false;
+        const suitW = 24 * size;
+        const suitH = 32 * size;
+        const headW = 18 * size;
+        const headH = 20 * size;
+        const arm = 16 * size;
+        const leg = 17 * size;
 
-        const bodyGradient = ctx.createLinearGradient(-bodyW / 2, -bodyH / 2, bodyW / 2, bodyH / 2);
-        bodyGradient.addColorStop(0, 'rgba(255,255,255,0.98)');
-        bodyGradient.addColorStop(0.45, 'rgba(225,225,225,0.96)');
-        bodyGradient.addColorStop(1, 'rgba(180,180,180,0.82)');
-        ctx.fillStyle = bodyGradient;
-        ctx.beginPath();
-        ctx.ellipse(0, 0, bodyW / 2, bodyH / 2, 0.15, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fillStyle = '#d7dde8';
+        ctx.fillRect(Math.round(-suitW / 2), Math.round(-suitH / 2), Math.round(suitW), Math.round(suitH));
+        ctx.fillStyle = '#bac5d7';
+        ctx.fillRect(Math.round(-suitW / 2 + 2), Math.round(-suitH / 2 + 3), Math.round(4 * size), Math.round(suitH - 6));
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(Math.round(-suitW / 2 + 4), Math.round(-suitH / 2 + 6), Math.round(suitW - 8), Math.round(suitH - 10));
+        ctx.fillStyle = '#9eaac1';
+        ctx.fillRect(Math.round(-suitW / 2 + 7), Math.round(-suitH / 2 + 11), Math.round(suitW - 14), Math.round(6 * size));
 
-        ctx.fillStyle = 'rgba(255,255,255,0.35)';
-        ctx.beginPath();
-        ctx.ellipse(-10 * swimmer.size, -20 * swimmer.size, headR * 0.55, headR * 0.3, -0.35, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fillStyle = '#eef6ff';
+        ctx.fillRect(Math.round(-headW / 2), Math.round(-suitH / 2 - headH + 2), Math.round(headW), Math.round(headH));
+        ctx.fillStyle = '#d8e1ee';
+        ctx.fillRect(Math.round(-headW / 2 + 2), Math.round(-suitH / 2 - headH + 4), Math.round(headW - 4), Math.round(headH - 4));
+        ctx.fillStyle = '#7ec8ff';
+        ctx.fillRect(Math.round(-headW / 2 + 4), Math.round(-suitH / 2 - headH + 6), Math.round(headW - 8), Math.round(headH - 10));
+        ctx.fillStyle = '#203249';
+        ctx.fillRect(Math.round(-headW / 2 + 5), Math.round(-suitH / 2 - headH + 10), Math.round(headW - 10), Math.round(6 * size));
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(Math.round(-2 * size), Math.round(-suitH / 2 - headH + 12), Math.round(4 * size), Math.round(3 * size));
 
-        ctx.strokeStyle = 'rgba(255,255,255,0.92)';
-        ctx.lineWidth = 4.5 * swimmer.size;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(-18 * swimmer.size, -2 * swimmer.size);
-        ctx.quadraticCurveTo(-34 * swimmer.size, -22 * swimmer.size + armSwing * 5, -54 * swimmer.size, -8 * swimmer.size);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(8 * swimmer.size, 0);
-        ctx.quadraticCurveTo(24 * swimmer.size, -18 * swimmer.size - armSwing * 5, 48 * swimmer.size, -10 * swimmer.size);
-        ctx.stroke();
+        ctx.fillStyle = '#f6f9ff';
+        ctx.fillRect(Math.round(-suitW / 2 - arm), Math.round(-4 * size), Math.round(arm), Math.round(5 * size));
+        ctx.fillRect(Math.round(suitW / 2), Math.round(-2 * size), Math.round(arm), Math.round(5 * size));
+        ctx.fillRect(Math.round(-8 * size), Math.round(suitH / 2 - 1), Math.round(5 * size), Math.round(leg));
+        ctx.fillRect(Math.round(3 * size), Math.round(suitH / 2 - 1), Math.round(5 * size), Math.round(leg));
 
-        ctx.strokeStyle = 'rgba(230,230,230,0.88)';
-        ctx.lineWidth = 4.1 * swimmer.size;
-        ctx.beginPath();
-        ctx.moveTo(-6 * swimmer.size, 8 * swimmer.size);
-        ctx.quadraticCurveTo(-22 * swimmer.size, 22 * swimmer.size + legSwing * 6, -42 * swimmer.size, 24 * swimmer.size);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(12 * swimmer.size, 8 * swimmer.size);
-        ctx.quadraticCurveTo(28 * swimmer.size, 20 * swimmer.size - legSwing * 6, 48 * swimmer.size, 22 * swimmer.size);
-        ctx.stroke();
+        ctx.fillStyle = '#8d9bb2';
+        ctx.fillRect(Math.round(-suitW / 2 - arm), Math.round(-4 * size), Math.round(3 * size), Math.round(5 * size));
+        ctx.fillRect(Math.round(suitW / 2 + arm - 3 * size), Math.round(-2 * size), Math.round(3 * size), Math.round(5 * size));
+        ctx.fillRect(Math.round(-8 * size), Math.round(suitH / 2 - 1 + leg - 4 * size), Math.round(5 * size), Math.round(4 * size));
+        ctx.fillRect(Math.round(3 * size), Math.round(suitH / 2 - 1 + leg - 4 * size), Math.round(5 * size), Math.round(4 * size));
 
-        ctx.strokeStyle = 'rgba(255,210,106,0.8)';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(-62 * swimmer.size, 12 * swimmer.size);
-        ctx.lineTo(-78 * swimmer.size, 18 * swimmer.size);
-        ctx.moveTo(54 * swimmer.size, 10 * swimmer.size);
-        ctx.lineTo(68 * swimmer.size, 18 * swimmer.size);
-        ctx.stroke();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(Math.round(suitW / 2 + 3 * size), Math.round(-8 * size), Math.round(5 * size), Math.round(2 * size));
+        ctx.fillRect(Math.round(-suitW / 2 - 8 * size), Math.round(2 * size), Math.round(5 * size), Math.round(2 * size));
 
-        if (swimmer.splash > 0) {
-          ctx.strokeStyle = 'rgba(255,255,255,0.45)';
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.arc(-70 * swimmer.size, 18 * swimmer.size, 8 + swimmer.splash * 0.45, 0, Math.PI * 2);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.arc(68 * swimmer.size, 18 * swimmer.size, 7 + swimmer.splash * 0.35, 0, Math.PI * 2);
-          ctx.stroke();
+        if (astro.splash > 0) {
+          ctx.fillStyle = 'rgba(255,255,255,0.45)';
+          ctx.fillRect(Math.round(-28 * size), Math.round(20 * size), Math.round(8 + astro.splash), 2);
+          ctx.fillRect(Math.round(22 * size), Math.round(18 * size), Math.round(8 + astro.splash), 2);
         }
 
         ctx.restore();
+      }
+
+      function drawRakhiKnot(anchor) {
+        const knotX = anchor.x + 22;
+        const knotY = anchor.y + 2;
+        ctx.save();
+        ctx.imageSmoothingEnabled = false;
+        ctx.shadowColor = 'rgba(255, 190, 70, 0.85)';
+        ctx.shadowBlur = 14;
+        drawPixelBlock(knotX - 10, knotY - 6, 20, 12, '#ffcf66');
+        drawPixelBlock(knotX - 6, knotY - 10, 12, 20, '#ff7aa8');
+        drawPixelBlock(knotX - 3, knotY - 3, 6, 6, '#fff2d5');
+        drawPixelBlock(knotX - 26, knotY - 2, 18, 4, '#ffd36a');
+        drawPixelBlock(knotX + 8, knotY - 2, 18, 4, '#ffd36a');
+        drawPixelBlock(knotX - 22, knotY + 3, 14, 3, '#ff9db9');
+        drawPixelBlock(knotX + 8, knotY + 3, 14, 3, '#ff9db9');
+        ctx.restore();
+      }
+
+      function drawRope(anchor) {
+        const points = state.rope;
+        ctx.save();
+        ctx.lineCap = 'square';
+        ctx.lineJoin = 'miter';
+        ctx.imageSmoothingEnabled = false;
+
+        for (let i = 0; i < points.length - 1; i += 1) {
+          const a = points[i];
+          const b = points[i + 1];
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const ang = Math.atan2(dy, dx);
+          const dist = Math.max(1, Math.hypot(dx, dy));
+          const pixelLen = Math.max(2, Math.round(dist / 4));
+          const x = a.x;
+          const y = a.y;
+
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(ang);
+          for (let p = 0; p < pixelLen; p += 1) {
+            const phase = (state.frame + i * 3 + p) % 8;
+            const colors = ['#ffd36a', '#ff9db9', '#fff2d5', '#ffcf66'];
+            drawPixelBlock(p * 4, Math.sin((phase + p) * 0.2) * 1.5, 4, 4, colors[p % colors.length]);
+            if (p % 5 === 0) {
+              drawPixelBlock(p * 4, -3, 4, 3, '#fff4df');
+            }
+          }
+          ctx.restore();
+        }
+
+        ctx.restore();
+
+        drawRakhiKnot(anchor);
       }
 
       function animate() {
@@ -740,40 +755,7 @@
 
         const { anchor } = updatePhysics();
         drawHouse(anchor);
-
-        const ropePoints = state.rope;
-        ctx.save();
-        ctx.lineCap = 'round';
-        for (let layer = 0; layer < 4; layer += 1) {
-          const lineWidth = 8 - layer * 1.5;
-          ctx.strokeStyle = layer === 0 ? 'rgba(255,210,106,0.95)' : layer === 1 ? 'rgba(255,124,164,0.9)' : layer === 2 ? 'rgba(255,235,190,0.7)' : 'rgba(255,255,255,0.5)';
-          ctx.lineWidth = lineWidth;
-          ctx.beginPath();
-          ropePoints.forEach((point, index) => {
-            if (index === 0) {
-              ctx.moveTo(point.x, point.y + layer * 0.6);
-            } else {
-              const nextPoint = ropePoints[index];
-              const prevPoint = ropePoints[index - 1];
-              const cx1 = prevPoint.x + (nextPoint.x - prevPoint.x) * 0.45;
-              const cy1 = prevPoint.y + (nextPoint.y - prevPoint.y) * 0.45 + Math.sin(state.frame * 0.03 + index * 0.2) * (4 - layer);
-              const cx2 = prevPoint.x + (nextPoint.x - prevPoint.x) * 0.55;
-              const cy2 = prevPoint.y + (nextPoint.y - prevPoint.y) * 0.55 - Math.sin(state.frame * 0.028 + index * 0.24) * (3.5 - layer);
-              ctx.bezierCurveTo(cx1, cy1, cx2, cy2, nextPoint.x, nextPoint.y);
-            }
-          });
-          ctx.shadowColor = layer === 0 ? 'rgba(255,190,70,0.8)' : 'rgba(255,124,164,0.45)';
-          ctx.shadowBlur = layer === 0 ? 18 : 8;
-          ctx.stroke();
-        }
-
-        for (const point of ropePoints) {
-          ctx.fillStyle = 'rgba(255,255,255,0.92)';
-          ctx.beginPath();
-          ctx.arc(point.x, point.y, 1.9, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        ctx.restore();
+        drawRope(anchor);
 
         for (const particle of state.particles) {
           ctx.fillStyle = `rgba(255,255,255,${Math.max(0, particle.life / 50) * 0.7})`;
@@ -782,17 +764,7 @@
           ctx.fill();
         }
 
-        state.swimmers.sort((a, b) => a.z - b.z);
-        state.swimmers.forEach(drawSwimmer);
-
-        const currentTargetX = state.width * 0.62;
-        ctx.save();
-        ctx.globalAlpha = 0.2;
-        ctx.fillStyle = 'rgba(255,255,255,0.18)';
-        ctx.beginPath();
-        ctx.arc(currentTargetX, state.height * 0.5, 62, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+        state.swimmers.forEach(drawAstronaut);
 
         requestAnimationFrame(animate);
       }
