@@ -7,106 +7,144 @@
   <style>
     :root {
       color-scheme: dark;
-      --bg: #000000;
       --fg: #ffffff;
-      --muted: rgba(255, 255, 255, 0.72);
-      --panel: rgba(255, 255, 255, 0.06);
-      --border: rgba(255, 255, 255, 0.14);
+      --muted: rgba(255, 255, 255, 0.74);
+      --panel: rgba(255, 255, 255, 0.07);
+      --border: rgba(255, 255, 255, 0.16);
     }
 
     * {
       box-sizing: border-box;
     }
 
-    html, body {
+    html,
+    body {
       margin: 0;
       width: 100%;
       height: 100%;
-      background: var(--bg);
+      background: #000;
       color: var(--fg);
+      overflow: hidden;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     body {
-      display: grid;
-      place-items: center;
-      overflow: hidden;
+      position: relative;
     }
 
-    .wrap {
-      width: min(1100px, calc(100vw - 32px));
+    #scene {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+
+    #scene::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.08), transparent 45%),
+                  linear-gradient(to bottom, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.58));
+      pointer-events: none;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      pointer-events: none;
+      padding: 20px;
+    }
+
+    .header {
+      align-self: start;
+      justify-self: center;
+      width: min(1100px, 100%);
       text-align: center;
-      padding: 32px 18px;
+      padding: 14px 18px 16px;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: rgba(0, 0, 0, 0.38);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 18px 60px rgba(255, 255, 255, 0.05);
+      margin-top: 8px;
     }
 
     h1 {
-      margin: 0 0 12px;
-      font-size: clamp(2rem, 4vw, 4rem);
-      letter-spacing: 0.08em;
+      margin: 0;
+      font-size: clamp(1.8rem, 3.2vw, 3.4rem);
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      font-weight: 700;
+      font-weight: 800;
     }
 
     .subtitle {
-      margin: 0 0 30px;
+      margin: 8px 0 0;
       color: var(--muted);
-      font-size: clamp(0.95rem, 1.4vw, 1.1rem);
-      letter-spacing: 0.02em;
+      font-size: clamp(0.92rem, 1.3vw, 1.05rem);
+      letter-spacing: 0.03em;
     }
 
-    .hype {
-      margin: 20px 0 0;
-      color: rgba(255, 255, 255, 0.9);
-      font-size: 0.98rem;
-      letter-spacing: 0.04em;
-      min-height: 1.4em;
+    .content {
+      align-self: end;
+      justify-self: center;
+      width: min(1140px, 100%);
+      padding-bottom: 6px;
     }
 
     .timer {
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 14px;
+      gap: 12px;
+      pointer-events: auto;
     }
 
     .unit {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 18px;
-      padding: 22px 12px 18px;
+      padding: 16px 12px 14px;
       backdrop-filter: blur(10px);
-      box-shadow: 0 20px 50px rgba(255, 255, 255, 0.04);
+      box-shadow: 0 18px 48px rgba(255, 255, 255, 0.05);
+      text-align: center;
     }
 
     .value {
       display: block;
-      font-size: clamp(2rem, 7vw, 4.8rem);
+      font-size: clamp(1.8rem, 5.4vw, 4rem);
       line-height: 1;
       font-weight: 800;
       letter-spacing: 0.03em;
+      font-variant-numeric: tabular-nums;
     }
 
     .label {
       display: block;
-      margin-top: 10px;
-      font-size: 0.86rem;
+      margin-top: 8px;
+      font-size: 0.75rem;
       text-transform: uppercase;
-      letter-spacing: 0.18em;
+      letter-spacing: 0.22em;
       color: var(--muted);
     }
 
-    .note {
-      margin-top: 22px;
-      color: rgba(255, 255, 255, 0.58);
-      font-size: 0.95rem;
+    .hype {
+      margin: 12px 0 0;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.84);
+      font-size: 0.96rem;
+      min-height: 1.3em;
+      letter-spacing: 0.03em;
     }
 
     .celebrate {
-      margin-top: 26px;
-      font-size: clamp(1.4rem, 2.5vw, 2.2rem);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      font-weight: 700;
+      margin: 14px 0 0;
+      text-align: center;
       display: none;
+      font-size: clamp(1.1rem, 2.5vw, 1.7rem);
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      font-weight: 800;
     }
 
     .celebrate.show {
@@ -114,6 +152,10 @@
     }
 
     @media (max-width: 760px) {
+      .overlay {
+        padding: 14px;
+      }
+
       .timer {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
@@ -121,59 +163,63 @@
       .unit:nth-child(5) {
         grid-column: 1 / -1;
       }
+
+      .header {
+        border-radius: 18px;
+      }
     }
 
     @media (max-width: 460px) {
-      .wrap {
-        width: min(100vw - 20px, 100%);
-      }
-
       .timer {
-        grid-template-columns: 1fr 1fr;
         gap: 10px;
       }
 
       .unit {
-        padding: 18px 10px 14px;
+        padding: 14px 10px 12px;
         border-radius: 16px;
       }
     }
   </style>
 </head>
 <body>
-  <main class="wrap" aria-label="Rakshabandhan countdown timer">
-    <h1>Rakshabandhan</h1>
-    <p class="subtitle">A tiny countdown for big sibling energy.</p>
+  <div id="scene" aria-hidden="true"></div>
 
-    <section class="timer" aria-live="polite">
-      <div class="unit">
-        <span class="value" id="weeks">00</span>
-        <span class="label">Weeks</span>
-      </div>
-      <div class="unit">
-        <span class="value" id="days">00</span>
-        <span class="label">Days</span>
-      </div>
-      <div class="unit">
-        <span class="value" id="hours">00</span>
-        <span class="label">Hours</span>
-      </div>
-      <div class="unit">
-        <span class="value" id="minutes">00</span>
-        <span class="label">Minutes</span>
-      </div>
-      <div class="unit">
-        <span class="value" id="seconds">00</span>
-        <span class="label">Seconds</span>
-      </div>
+  <main class="overlay" aria-label="Rakshabandhan countdown timer">
+    <header class="header">
+      <h1>Rakshabandhan</h1>
+      <p class="subtitle">A tiny countdown for big sibling energy.</p>
+    </header>
+
+    <section class="content">
+      <section class="timer" aria-live="polite">
+        <div class="unit">
+          <span class="value" id="weeks">00</span>
+          <span class="label">Weeks</span>
+        </div>
+        <div class="unit">
+          <span class="value" id="days">00</span>
+          <span class="label">Days</span>
+        </div>
+        <div class="unit">
+          <span class="value" id="hours">00</span>
+          <span class="label">Hours</span>
+        </div>
+        <div class="unit">
+          <span class="value" id="minutes">00</span>
+          <span class="label">Minutes</span>
+        </div>
+        <div class="unit">
+          <span class="value" id="seconds">00</span>
+          <span class="label">Seconds</span>
+        </div>
+      </section>
+
+      <p class="hype" id="hype">Loading sibling drama...</p>
+      <div class="celebrate" id="celebrate">Happy Rakshabandhan</div>
     </section>
-
-    <p class="hype" id="hype">Loading sibling drama...</p>
-
-    <div class="celebrate" id="celebrate">Happy Rakshabandhan</div>
-    
   </main>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r160/three.min.js"></script>
   <script>
     const weeksEl = document.getElementById('weeks');
     const daysEl = document.getElementById('days');
@@ -206,10 +252,10 @@
       return String(value).padStart(2, '0');
     }
 
-    function render() {
+    function renderCountdown() {
       const now = new Date();
       const target = getTargetDate(now);
-      let remaining = target - now;
+      const remaining = target - now;
 
       if (remaining <= 0) {
         weeksEl.textContent = '00';
@@ -239,8 +285,244 @@
       hypeEl.textContent = hypeLines[totalSeconds % hypeLines.length];
     }
 
-    render();
-    setInterval(render, 1000);
+    function createThreeScene() {
+      const container = document.getElementById('scene');
+      const scene = new THREE.Scene();
+      scene.fog = new THREE.Fog(0x000000, 18, 60);
+
+      const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200);
+      camera.position.set(0, 5, 18);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      container.appendChild(renderer.domElement);
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1.35);
+      scene.add(ambientLight);
+
+      const keyLight = new THREE.DirectionalLight(0xffffff, 1.9);
+      keyLight.position.set(8, 14, 10);
+      scene.add(keyLight);
+
+      const rimLight = new THREE.DirectionalLight(0xaab7ff, 0.65);
+      rimLight.position.set(-10, 4, -8);
+      scene.add(rimLight);
+
+      const starsGeometry = new THREE.BufferGeometry();
+      const starCount = 1800;
+      const starPositions = new Float32Array(starCount * 3);
+      for (let i = 0; i < starCount; i += 1) {
+        const radius = 80 + Math.random() * 90;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos((Math.random() * 2) - 1);
+        const x = radius * Math.sin(phi) * Math.cos(theta);
+        const y = radius * Math.cos(phi);
+        const z = radius * Math.sin(phi) * Math.sin(theta);
+        starPositions[i * 3] = x;
+        starPositions[i * 3 + 1] = y;
+        starPositions[i * 3 + 2] = z;
+      }
+      starsGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+      const starsMaterial = new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 0.16,
+        sizeAttenuation: true,
+        transparent: true,
+        opacity: 0.92,
+      });
+      const stars = new THREE.Points(starsGeometry, starsMaterial);
+      scene.add(stars);
+
+      const houseGroup = new THREE.Group();
+      houseGroup.position.set(0, -1.1, 0);
+      scene.add(houseGroup);
+
+      const houseBody = new THREE.Mesh(
+        new THREE.BoxGeometry(4.4, 2.8, 4.4),
+        new THREE.MeshStandardMaterial({ color: 0xf4f4f4, roughness: 0.78, metalness: 0.02 })
+      );
+      houseBody.position.y = 1.4;
+      houseGroup.add(houseBody);
+
+      const roof = new THREE.Mesh(
+        new THREE.ConeGeometry(3.6, 2.2, 4),
+        new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.72, metalness: 0.04 })
+      );
+      roof.position.y = 4.0;
+      roof.rotation.y = Math.PI * 0.25;
+      houseGroup.add(roof);
+
+      const door = new THREE.Mesh(
+        new THREE.BoxGeometry(0.9, 1.7, 0.18),
+        new THREE.MeshStandardMaterial({ color: 0x2e2e2e, roughness: 0.9 })
+      );
+      door.position.set(0, 0.85, 2.26);
+      houseGroup.add(door);
+
+      const windowMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6, transparent: true, opacity: 0.68 });
+      const windowGeo = new THREE.BoxGeometry(0.7, 0.7, 0.12);
+      const windowPositions = [
+        [-1.2, 2.0, 2.26],
+        [1.2, 2.0, 2.26],
+        [-1.2, 1.1, -2.26],
+        [1.2, 1.1, -2.26],
+      ];
+      windowPositions.forEach(([x, y, z]) => {
+        const win = new THREE.Mesh(windowGeo, windowMaterial);
+        win.position.set(x, y, z);
+        if (z < 0) {
+          win.rotation.y = Math.PI;
+        }
+        houseGroup.add(win);
+      });
+
+      const groundGlow = new THREE.Mesh(
+        new THREE.CircleGeometry(8, 48),
+        new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.05 })
+      );
+      groundGlow.rotation.x = -Math.PI / 2;
+      groundGlow.position.y = -0.4;
+      scene.add(groundGlow);
+
+      function createFigure() {
+        const figure = new THREE.Group();
+        const white = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.5, metalness: 0.08 });
+        const softGray = new THREE.MeshStandardMaterial({ color: 0xdedede, roughness: 0.65, metalness: 0.02 });
+
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.28, 20, 16), white);
+        head.position.y = 1.55;
+        figure.add(head);
+
+        const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.3, 0.92, 14), softGray);
+        torso.position.y = 0.9;
+        torso.rotation.z = 0.08;
+        figure.add(torso);
+
+        const hip = new THREE.Mesh(new THREE.SphereGeometry(0.16, 14, 10), white);
+        hip.position.y = 0.38;
+        figure.add(hip);
+
+        const armGeo = new THREE.CylinderGeometry(0.06, 0.08, 0.8, 10);
+        const legGeo = new THREE.CylinderGeometry(0.07, 0.09, 0.88, 10);
+
+        const leftArm = new THREE.Mesh(armGeo, white);
+        leftArm.position.set(-0.33, 1.08, 0);
+        leftArm.rotation.z = 0.95;
+        figure.add(leftArm);
+
+        const rightArm = new THREE.Mesh(armGeo, white);
+        rightArm.position.set(0.33, 1.08, 0);
+        rightArm.rotation.z = -1.0;
+        figure.add(rightArm);
+
+        const leftLeg = new THREE.Mesh(legGeo, softGray);
+        leftLeg.position.set(-0.12, -0.17, 0);
+        leftLeg.rotation.z = 0.2;
+        figure.add(leftLeg);
+
+        const rightLeg = new THREE.Mesh(legGeo, softGray);
+        rightLeg.position.set(0.12, -0.17, 0);
+        rightLeg.rotation.z = -0.18;
+        figure.add(rightLeg);
+
+        const ankleGlow = new THREE.Mesh(
+          new THREE.SphereGeometry(0.09, 10, 8),
+          new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.25 })
+        );
+        ankleGlow.position.y = -0.6;
+        figure.add(ankleGlow);
+
+        return { figure, leftArm, rightArm };
+      }
+
+      const figures = [];
+      const figureCount = 14;
+      for (let i = 0; i < figureCount; i += 1) {
+        const { figure, leftArm, rightArm } = createFigure();
+        const angle = (i / figureCount) * Math.PI * 2;
+        const radius = 6.4 + (i % 3) * 0.55;
+        figure.userData = {
+          angle,
+          radius,
+          height: -0.2 + (i % 4) * 0.16,
+          speed: 0.1 + (i % 5) * 0.018,
+          phase: i * 0.6,
+        };
+        figure.position.set(
+          Math.cos(angle) * radius,
+          0,
+          Math.sin(angle) * radius
+        );
+        figure.lookAt(0, 1.1, 0);
+        scene.add(figure);
+        figures.push({ figure, leftArm, rightArm });
+      }
+
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(6.9, 0.04, 8, 120),
+        new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.08 })
+      );
+      ring.rotation.x = Math.PI / 2;
+      ring.position.y = -0.25;
+      scene.add(ring);
+
+      let frame = 0;
+
+      function animate() {
+        frame += 0.01;
+
+        stars.rotation.y += 0.00035;
+        stars.rotation.x = Math.sin(frame * 0.12) * 0.03;
+        houseGroup.rotation.y = Math.sin(frame * 0.18) * 0.13;
+        houseGroup.position.y = -1.1 + Math.sin(frame * 0.9) * 0.08;
+        roof.rotation.y += 0.002;
+
+        figures.forEach((entry, index) => {
+          const { figure, leftArm, rightArm } = entry;
+          const data = figure.userData;
+          const bob = Math.sin(frame * 2 + data.phase) * 0.22;
+          const orbit = data.angle + frame * data.speed;
+          const radius = data.radius + Math.sin(frame * 1.5 + data.phase) * 0.18;
+          const sway = Math.sin(frame * 1.2 + data.phase) * 0.12;
+
+          figure.position.x = Math.cos(orbit) * radius;
+          figure.position.z = Math.sin(orbit) * radius;
+          figure.position.y = bob + data.height;
+
+          figure.lookAt(0, 1.1, 0);
+          figure.rotation.z = Math.sin(frame * 1.8 + data.phase) * 0.08;
+
+          leftArm.rotation.z = 0.9 + Math.sin(frame * 1.9 + data.phase) * 0.2;
+          rightArm.rotation.z = -0.95 + Math.cos(frame * 2.1 + data.phase) * 0.2;
+          figure.position.x += sway * 0.15;
+
+          const scale = 0.9 + ((index % 4) * 0.02);
+          figure.scale.setScalar(scale);
+        });
+
+        camera.position.x = Math.sin(frame * 0.25) * 0.6;
+        camera.position.y = 5 + Math.cos(frame * 0.22) * 0.25;
+        camera.lookAt(0, 1, 0);
+
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      });
+    }
+
+    renderCountdown();
+    setInterval(renderCountdown, 1000);
+    createThreeScene();
   </script>
 </body>
 </html>
