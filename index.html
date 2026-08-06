@@ -66,11 +66,11 @@
       inset: 0;
       overflow: hidden;
       pointer-events: none;
-      z-index: 3;
+      z-index: 12;
     }
 
     .hype-message {
-      position: absolute;
+      position: fixed;
       left: 0;
       top: 0;
       display: inline-block;
@@ -94,6 +94,7 @@
       user-select: none;
       cursor: grab;
       pointer-events: auto;
+      transform-origin: center center;
       will-change: transform, opacity, filter;
     }
 
@@ -282,9 +283,9 @@
     ];
 
     const floatingMessages = [];
-    const maxMessagesOnScreen = 6;
-    const spawnIntervalMs = 1400;
-    const messageLifetimeMs = 12000;
+    const maxMessagesOnScreen = 4;
+    const spawnIntervalMs = 2200;
+    const messageLifetimeMs = 14000;
 
     let hypeIndex = 0;
     let messageSeed = 0;
@@ -356,10 +357,10 @@
       hypeFieldEl.appendChild(element);
 
       const now = performance.now();
-      const startX = window.innerWidth * 0.5 + (Math.random() - 0.5) * 70;
-      const startY = window.innerHeight * 0.58 + (Math.random() - 0.5) * 45;
+      const startX = window.innerWidth * 0.5 + (Math.random() - 0.5) * 48;
+      const startY = window.innerHeight * 0.58 + (Math.random() - 0.5) * 32;
       const angle = Math.random() * Math.PI * 2;
-      const speed = 220 + Math.random() * 180;
+      const speed = 90 + Math.random() * 80;
 
       const message = {
         element,
@@ -367,7 +368,7 @@
         x: startX,
         y: startY,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 120,
+        vy: Math.sin(angle) * speed - 85,
         rotation: (Math.random() - 0.5) * 18,
         spin: (Math.random() - 0.5) * 24,
         bornAt: now,
@@ -411,8 +412,8 @@
         message.dragging = false;
         message.pointerId = null;
         element.classList.remove('is-dragging');
-        message.vx = (Math.random() - 0.5) * 260;
-        message.vy = -130 - Math.random() * 150;
+        message.vx = (Math.random() - 0.5) * 120;
+        message.vy = -70 - Math.random() * 90;
         message.rotation = (Math.random() - 0.5) * 18;
         message.spin = (Math.random() - 0.5) * 24;
       }
@@ -467,13 +468,13 @@
             message.y = clamp(message.y, bounds.minY, bounds.maxY);
           }
 
-          message.vx *= 0.997;
-          message.vy *= 0.997;
+          message.vx *= 0.998;
+          message.vy *= 0.998;
         }
 
         const age = now - message.bornAt;
         const burstScale = age < 260 ? 0.42 + (age / 260) * 0.66 : 1;
-        const floatPulse = message.dragging ? 1 : 1 + Math.sin((now / 700) + (index * 0.5)) * 0.02;
+        const floatPulse = message.dragging ? 1 : 1 + Math.sin((now / 900) + (index * 0.5)) * 0.015;
 
         message.element.style.opacity = String(Math.min(age / 240, 1));
         message.element.style.transform = `translate3d(${message.x}px, ${message.y}px, 0) rotate(${message.rotation}deg) scale(${burstScale * floatPulse})`;
