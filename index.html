@@ -98,10 +98,6 @@
       will-change: transform, opacity, filter;
     }
 
-    .hype-message.is-bursting {
-      animation: messageBurst 260ms ease-out forwards;
-    }
-
     .hype-message.is-dragging {
       transition: none;
       cursor: grabbing;
@@ -128,26 +124,6 @@
       background: radial-gradient(circle, rgba(255, 197, 84, 0.22), transparent 58%);
       filter: blur(18px);
       transform: scale(1.15);
-    }
-
-    @keyframes messageBurst {
-      0% {
-        opacity: 0;
-        filter: blur(12px) saturate(1.15);
-        transform: translate3d(var(--x, 0px), var(--y, 0px), 0) scale(0.42);
-      }
-
-      45% {
-        opacity: 1;
-        filter: blur(0) saturate(1);
-        transform: translate3d(var(--x, 0px), var(--y, 0px), 0) scale(1.08);
-      }
-
-      100% {
-        opacity: 1;
-        filter: blur(0) saturate(1);
-        transform: translate3d(var(--x, 0px), var(--y, 0px), 0) scale(1);
-      }
     }
 
     .timer {
@@ -312,6 +288,15 @@
       return Math.min(Math.max(value, min), max);
     }
 
+    function getMessageSize(element) {
+      const rect = element.getBoundingClientRect();
+
+      return {
+        width: rect.width || 220,
+        height: rect.height || 56
+      };
+    }
+
     function getViewportBounds(element) {
       const rect = element.getBoundingClientRect();
 
@@ -321,6 +306,43 @@
         minY: rect.height / 2 + 14,
         maxY: window.innerHeight - rect.height / 2 - 18
       };
+    }
+
+    function getRandomEdgePosition(element) {
+      const size = getMessageSize(element);
+      const padding = 16;
+      const edge = Math.floor(Math.random() * 4);
+      const horizontalMin = padding + size.width / 2;
+      const horizontalMax = window.innerWidth - padding - size.width / 2;
+      const verticalMin = padding + size.height / 2;
+      const verticalMax = window.innerHeight - padding - size.height / 2;
+
+      switch (edge) {
+        case 0:
+          return {
+            x: clamp(Math.random() * window.innerWidth, horizontalMin, horizontalMax),
+            y: verticalMin
+          };
+        case 1:
+          return {
+            x: horizontalMax,
+            y: clamp(Math.random() * window.innerHeight, verticalMin, verticalMax)
+          };
+        case 2:
+          return {
+            x: clamp(Math.random() * window.innerWidth, horizontalMin, horizontalMax),
+            y: verticalMax
+          };
+        default:
+          return {
+            x: horizontalMin,
+            y: clamp(Math.random() * window.innerHeight, verticalMin, verticalMax)
+          };
+      }
+    }
+
+    function applyMessageTransform(message, scale = 1) {
+      message.element.style.transform = `translate3d(${message.x}px, ${message.y}px, 0) rotate(${message.rotation}deg) scale(${scale})`;
     }
 
     function removeMessage(message) {
@@ -352,23 +374,30 @@
       }
 
       const element = document.createElement('div');
-      element.className = 'hype-message is-bursting';
+      element.className = 'hype-message';
       element.textContent = text;
       hypeFieldEl.appendChild(element);
 
       const now = performance.now();
-      const startX = window.innerWidth * 0.5 + (Math.random() - 0.5) * 48;
-      const startY = window.innerHeight * 0.58 + (Math.random() - 0.5) * 32;
+      const startPosition = getRandomEdgePosition(element);
+      const centerX = window.innerWidth * 0.5;
+      const centerY = window.innerHeight * 0.5;
       const angle = Math.random() * Math.PI * 2;
       const speed = 90 + Math.random() * 80;
+
+      let directionX = centerX - startPosition.x;
+      let directionY = centerY - startPosition.y;
+      const directionLength = Math.hypot(directionX, directionY) || 1;
+      directionX /= directionLength;
+      directionY /= directionLength;
 
       const message = {
         element,
         text,
-        x: startX,
-        y: startY,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 85,
+        x: startPosition.x,
+        y: startPosition.y,
+        vx: directionX * speed + Math.cos(angle) * 24,
+        vy: directionY * speed + Math.sin(angle) * 24,
         rotation: (Math.random() - 0.5) * 18,
         spin: (Math.random() - 0.5) * 24,
         bornAt: now,
@@ -380,6 +409,8 @@
         dragOffsetY: 0
       };
 
+      element.style.opacity = '0';
+      applyMessageTransform(message, 0.42);
       element.style.zIndex = String(40 + floatingMessages.length);
 
       element.addEventListener('pointerdown', (event) => {
@@ -477,7 +508,7 @@
         const floatPulse = message.dragging ? 1 : 1 + Math.sin((now / 900) + (index * 0.5)) * 0.015;
 
         message.element.style.opacity = String(Math.min(age / 240, 1));
-        message.element.style.transform = `translate3d(${message.x}px, ${message.y}px, 0) rotate(${message.rotation}deg) scale(${burstScale * floatPulse})`;
+        applyMessageTransform(message, burstScale * floatPulse);
 
         if (!message.sticky && age > messageLifetimeMs && !message.dragging) {
           removeMessage(message);
