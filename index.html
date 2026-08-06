@@ -296,10 +296,10 @@
       const rect = element.getBoundingClientRect();
 
       return {
-        minX: rect.width / 2 + 14,
-        maxX: window.innerWidth - rect.width / 2 - 14,
-        minY: rect.height / 2 + 14,
-        maxY: window.innerHeight - rect.height / 2 - 18
+        minX: 14,
+        maxX: Math.max(14, window.innerWidth - rect.width - 14),
+        minY: 14,
+        maxY: Math.max(14, window.innerHeight - rect.height - 18)
       };
     }
 
@@ -307,10 +307,10 @@
       const size = getMessageSize(element);
       const padding = 16;
       const edge = Math.floor(Math.random() * 4);
-      const horizontalMin = padding + size.width / 2;
-      const horizontalMax = window.innerWidth - padding - size.width / 2;
-      const verticalMin = padding + size.height / 2;
-      const verticalMax = window.innerHeight - padding - size.height / 2;
+      const horizontalMin = padding;
+      const horizontalMax = Math.max(padding, window.innerWidth - padding - size.width);
+      const verticalMin = padding;
+      const verticalMax = Math.max(padding, window.innerHeight - padding - size.height);
 
       switch (edge) {
         case 0:
