@@ -56,10 +56,97 @@
 
     .hype {
       margin: 20px 0 0;
-      color: rgba(255, 255, 255, 0.9);
-      font-size: 0.98rem;
+      min-height: 4.5rem;
+      position: relative;
+      display: grid;
+      place-items: center;
+      overflow: visible;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .hype-burst {
+      position: relative;
+      display: inline-block;
+      max-width: min(680px, 92vw);
+      padding: 0.9rem 1.2rem;
+      border-radius: 999px;
+      color: rgba(255, 255, 255, 0.96);
+      font-size: clamp(0.95rem, 1.7vw, 1.15rem);
       letter-spacing: 0.04em;
-      min-height: 1.4em;
+      text-wrap: balance;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 209, 102, 0.12));
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+        0 18px 60px rgba(255, 200, 70, 0.12),
+        0 0 32px rgba(255, 255, 255, 0.08);
+      transform: translate3d(var(--x, 0px), var(--y, 0px), 0) scale(var(--scale, 1));
+      transition:
+        transform 240ms cubic-bezier(0.2, 0.9, 0.2, 1),
+        opacity 240ms ease,
+        filter 240ms ease;
+      opacity: 0;
+      filter: blur(8px) saturate(1.15);
+      pointer-events: auto;
+      will-change: transform, opacity, filter;
+    }
+
+    .hype-burst.show {
+      opacity: 1;
+      filter: blur(0) saturate(1);
+      animation: burstFloat 8s ease-in-out infinite alternate;
+    }
+
+    .hype-burst.is-dragging {
+      animation: none;
+      transition: none;
+      cursor: grabbing;
+    }
+
+    .hype-burst::before,
+    .hype-burst::after {
+      content: "";
+      position: absolute;
+      inset: -12px;
+      border-radius: inherit;
+      pointer-events: none;
+      opacity: 0.55;
+    }
+
+    .hype-burst::before {
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.28), transparent 62%);
+      filter: blur(10px);
+      transform: scale(1.08);
+    }
+
+    .hype-burst::after {
+      inset: -24px;
+      background: radial-gradient(circle, rgba(255, 197, 84, 0.22), transparent 58%);
+      filter: blur(18px);
+      transform: scale(1.15);
+    }
+
+    @keyframes burstFloat {
+      0% {
+        transform: translate3d(var(--x, 0px), var(--y, 0px), 0) scale(var(--scale, 1));
+      }
+
+      25% {
+        transform: translate3d(calc(var(--x, 0px) + 12px), calc(var(--y, 0px) - 10px), 0) scale(calc(var(--scale, 1) + 0.03));
+      }
+
+      50% {
+        transform: translate3d(calc(var(--x, 0px) - 10px), calc(var(--y, 0px) - 18px), 0) scale(calc(var(--scale, 1) + 0.06));
+      }
+
+      75% {
+        transform: translate3d(calc(var(--x, 0px) + 8px), calc(var(--y, 0px) - 28px), 0) scale(calc(var(--scale, 1) + 0.03));
+      }
+
+      100% {
+        transform: translate3d(calc(var(--x, 0px) - 6px), calc(var(--y, 0px) - 40px), 0) scale(var(--scale, 1));
+      }
     }
 
     .timer {
@@ -92,12 +179,6 @@
       text-transform: uppercase;
       letter-spacing: 0.18em;
       color: var(--muted);
-    }
-
-    .note {
-      margin-top: 22px;
-      color: rgba(255, 255, 255, 0.58);
-      font-size: 0.95rem;
     }
 
     .celebrate {
@@ -137,6 +218,11 @@
         padding: 18px 10px 14px;
         border-radius: 16px;
       }
+
+      .hype-burst {
+        max-width: 88vw;
+        padding: 0.8rem 1rem;
+      }
     }
   </style>
 </head>
@@ -168,7 +254,9 @@
       </div>
     </section>
 
-    <p class="hype" id="hype">Loading sibling drama...</p>
+    <p class="hype" id="hype" aria-label="Rotating sibling reminders">
+      <span class="hype-burst" id="hypeBurst">Loading sibling drama...</span>
+    </p>
 
     <div class="celebrate" id="celebrate">Happy Rakshabandhan</div>
     
@@ -182,6 +270,7 @@
     const secondsEl = document.getElementById('seconds');
     const celebrateEl = document.getElementById('celebrate');
     const hypeEl = document.getElementById('hype');
+    const hypeBurstEl = document.getElementById('hypeBurst');
 
     const hypeLines = [
       'Nishtha ABCD yaad karke aana.',
@@ -191,9 +280,24 @@
       'Vivek bhaiya is baar aajana 😭',
       'SMEET IS BAR AYEGA',
       'Sabko aana hai, kya pata, kal ho na ho?'
-      
-
     ];
+
+    const floatState = {
+      x: 0,
+      y: 0,
+      vx: 0.18,
+      vy: -0.22,
+      scale: 1,
+      dragging: false,
+      pointerId: null,
+      offsetX: 0,
+      offsetY: 0
+    };
+
+    let hypeIndex = 0;
+    let hypeTimer = null;
+    let floatFrame = null;
+    let countdownComplete = false;
 
     function getTargetDate(now) {
       const year = now.getFullYear();
@@ -210,12 +314,143 @@
       return String(value).padStart(2, '0');
     }
 
+    function applyHypeTransform() {
+      hypeBurstEl.style.setProperty('--x', `${floatState.x}px`);
+      hypeBurstEl.style.setProperty('--y', `${floatState.y}px`);
+      hypeBurstEl.style.setProperty('--scale', floatState.scale.toFixed(3));
+    }
+
+    function burstHypeLine() {
+      hypeIndex = (hypeIndex + 1) % hypeLines.length;
+      hypeBurstEl.textContent = hypeLines[hypeIndex];
+      hypeBurstEl.classList.remove('show');
+      hypeBurstEl.style.setProperty('--scale', '0.82');
+      floatState.scale = 0.82;
+      applyHypeTransform();
+
+      requestAnimationFrame(() => {
+        hypeBurstEl.classList.add('show');
+        floatState.scale = 1;
+        applyHypeTransform();
+      });
+    }
+
+    function startHypeRotation() {
+      if (hypeTimer) {
+        clearInterval(hypeTimer);
+      }
+
+      hypeTimer = setInterval(burstHypeLine, 4200);
+    }
+
+    function stopHypeRotation() {
+      if (hypeTimer) {
+        clearInterval(hypeTimer);
+        hypeTimer = null;
+      }
+    }
+
+    function animateFloat() {
+      if (!floatState.dragging) {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const burstRect = hypeBurstEl.getBoundingClientRect();
+        const timerRect = document.querySelector('.timer').getBoundingClientRect();
+        const minX = -(viewportWidth / 2 - burstRect.width / 2 - 18);
+        const maxX = viewportWidth / 2 - burstRect.width / 2 - 18;
+        const minY = timerRect.bottom - window.innerHeight / 2 + 18;
+        const maxY = viewportHeight / 2 - burstRect.height / 2 - 12;
+
+        floatState.x += floatState.vx;
+        floatState.y += floatState.vy;
+
+        if (floatState.x <= minX || floatState.x >= maxX) {
+          floatState.vx *= -1;
+          floatState.x = Math.min(Math.max(floatState.x, minX), maxX);
+        }
+
+        if (floatState.y <= minY || floatState.y >= maxY) {
+          floatState.vy *= -1;
+          floatState.y = Math.min(Math.max(floatState.y, minY), maxY);
+        }
+
+        applyHypeTransform();
+      }
+
+      floatFrame = requestAnimationFrame(animateFloat);
+    }
+
+    function clampBurstPosition(nextX, nextY) {
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const burstRect = hypeBurstEl.getBoundingClientRect();
+      const timerRect = document.querySelector('.timer').getBoundingClientRect();
+      const minX = -(viewportWidth / 2 - burstRect.width / 2 - 18);
+      const maxX = viewportWidth / 2 - burstRect.width / 2 - 18;
+      const minY = timerRect.bottom - window.innerHeight / 2 + 18;
+      const maxY = viewportHeight / 2 - burstRect.height / 2 - 12;
+
+      return {
+        x: Math.min(Math.max(nextX, minX), maxX),
+        y: Math.min(Math.max(nextY, minY), maxY)
+      };
+    }
+
+    hypeBurstEl.addEventListener('pointerdown', (event) => {
+      floatState.dragging = true;
+      floatState.pointerId = event.pointerId;
+      hypeBurstEl.setPointerCapture(event.pointerId);
+      hypeBurstEl.classList.add('is-dragging');
+
+      const rect = hypeBurstEl.getBoundingClientRect();
+      floatState.offsetX = event.clientX - (rect.left + rect.width / 2);
+      floatState.offsetY = event.clientY - (rect.top + rect.height / 2);
+      event.preventDefault();
+    });
+
+    hypeBurstEl.addEventListener('pointermove', (event) => {
+      if (!floatState.dragging || event.pointerId !== floatState.pointerId) {
+        return;
+      }
+
+      const next = clampBurstPosition(
+        event.clientX - window.innerWidth / 2 - floatState.offsetX,
+        event.clientY - window.innerHeight / 2 - floatState.offsetY
+      );
+
+      floatState.x = next.x;
+      floatState.y = next.y;
+      floatState.vx = 0;
+      floatState.vy = 0;
+      applyHypeTransform();
+    });
+
+    function endDrag(event) {
+      if (event.pointerId !== floatState.pointerId) {
+        return;
+      }
+
+      floatState.dragging = false;
+      floatState.pointerId = null;
+      hypeBurstEl.classList.remove('is-dragging');
+      floatState.vx = (Math.random() > 0.5 ? 1 : -1) * (0.14 + Math.random() * 0.12);
+      floatState.vy = -(0.12 + Math.random() * 0.14);
+    }
+
+    hypeBurstEl.addEventListener('pointerup', endDrag);
+    hypeBurstEl.addEventListener('pointercancel', endDrag);
+
     function render() {
       const now = new Date();
       const target = getTargetDate(now);
       let remaining = target - now;
 
       if (remaining <= 0) {
+        if (!countdownComplete) {
+          countdownComplete = true;
+          stopHypeRotation();
+        }
+
         weeksEl.textContent = '00';
         daysEl.textContent = '00';
         hoursEl.textContent = '00';
@@ -223,6 +458,8 @@
         secondsEl.textContent = '00';
         celebrateEl.classList.add('show');
         hypeEl.textContent = 'It is officially Rakshabandhan. Brother-sister chaos unlocked.';
+        hypeBurstEl.textContent = 'It is officially Rakshabandhan. Brother-sister chaos unlocked.';
+        hypeBurstEl.classList.add('show');
         return;
       }
 
@@ -240,9 +477,18 @@
       hoursEl.textContent = pad(hours);
       minutesEl.textContent = pad(minutes);
       secondsEl.textContent = pad(seconds);
-      hypeEl.textContent = hypeLines[totalSeconds % hypeLines.length];
+      if (!hypeBurstEl.classList.contains('show')) {
+        hypeBurstEl.textContent = hypeLines[hypeIndex];
+        hypeBurstEl.classList.add('show');
+      }
+
+      hypeEl.setAttribute('aria-live', floatState.dragging ? 'off' : 'polite');
     }
 
+    hypeBurstEl.classList.add('show');
+    applyHypeTransform();
+    startHypeRotation();
+    floatFrame = requestAnimationFrame(animateFloat);
     render();
     setInterval(render, 1000);
   </script>
