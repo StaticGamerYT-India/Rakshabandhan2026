@@ -81,29 +81,26 @@
       left: 0;
       top: 0;
       display: inline-block;
-      max-width: min(76vw, 440px);
+      max-width: min(72vw, 380px);
       padding: 0.92rem 1.15rem;
-      border-radius: 999px;
+      border-radius: 22px;
       color: rgba(255, 255, 255, 0.97);
       font-size: clamp(0.92rem, 1.5vw, 1.08rem);
       line-height: 1.28;
       letter-spacing: 0.03em;
       text-wrap: balance;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 178, 92, 0.14));
-      border: 1px solid rgba(255, 255, 255, 0.26);
-      box-shadow:
-        0 0 0 1px rgba(255, 255, 255, 0.08) inset,
-        0 18px 50px rgba(255, 180, 70, 0.16),
-        0 0 30px rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.24);
       opacity: 0;
       filter: none;
-      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.36);
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.34);
       touch-action: none;
       user-select: none;
       cursor: grab;
       pointer-events: auto;
       transform-origin: center center;
-      will-change: transform, opacity, filter;
+      will-change: transform, opacity;
     }
 
     .hype-message.is-dragging {
@@ -115,30 +112,30 @@
     .hype-message::after {
       content: "";
       position: absolute;
-      inset: -12px;
+      inset: -8px;
       border-radius: inherit;
       pointer-events: none;
-      opacity: 0.55;
+      opacity: 0.22;
     }
 
     .hype-message::before {
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.28), transparent 62%);
-      filter: blur(10px);
-      transform: scale(1.08);
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.22), transparent 68%);
+      filter: blur(6px);
+      transform: scale(1.02);
     }
 
     .hype-message::after {
-      inset: -24px;
-      background: radial-gradient(circle, rgba(255, 197, 84, 0.22), transparent 58%);
-      filter: blur(18px);
-      transform: scale(1.15);
+      inset: -16px;
+      background: radial-gradient(circle, rgba(255, 197, 84, 0.12), transparent 60%);
+      filter: blur(10px);
+      transform: scale(1.08);
     }
 
     .timer {
       display: grid;
       width: 100%;
       grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 14px;
+      gap: 12px;
     }
 
     .unit {
@@ -146,9 +143,9 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 18px;
-      padding: 22px 12px 18px;
+      padding: 20px 12px 16px;
       backdrop-filter: blur(10px);
-      box-shadow: 0 20px 50px rgba(255, 255, 255, 0.04);
+      box-shadow: 0 14px 32px rgba(255, 255, 255, 0.04);
     }
 
     .value {
@@ -169,11 +166,11 @@
     }
 
     .celebrate {
-      margin-top: 26px;
-      font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+      margin-top: 10px;
+      font-size: clamp(1.2rem, 2.2vw, 1.8rem);
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      font-weight: 700;
+      font-weight: 600;
       display: none;
     }
 
@@ -183,7 +180,7 @@
 
     @media (max-width: 460px) {
       .wrap {
-        padding: 16px 8px 20px;
+        padding: 14px 6px 18px;
       }
 
       .timer {
@@ -258,12 +255,11 @@
     ];
 
     const floatingMessages = [];
-    const maxMessagesOnScreen = 4;
-    const spawnIntervalMs = 2200;
-    const messageLifetimeMs = 14000;
+    const spawnIntervalMs = 650;
+    const totalMessages = hypeLines.length;
 
     let hypeIndex = 0;
-    let messageSeed = 0;
+    let messagesSpawned = 0;
     let messageTimer = null;
     let animationFrameId = null;
     let countdownComplete = false;
@@ -368,10 +364,6 @@
 
       hypeIndex = (hypeIndex + 1) % hypeLines.length;
 
-      if (floatingMessages.length >= maxMessagesOnScreen) {
-        removeMessage(floatingMessages[0]);
-      }
-
       const element = document.createElement('div');
       element.className = 'hype-message';
       element.textContent = text;
@@ -395,12 +387,15 @@
         text,
         x: startPosition.x,
         y: startPosition.y,
-        vx: directionX * speed + Math.cos(angle) * 24,
-        vy: directionY * speed + Math.sin(angle) * 24,
+        vx: directionX * speed + Math.cos(angle) * 18,
+        vy: directionY * speed + Math.sin(angle) * 18,
         rotation: (Math.random() - 0.5) * 18,
         spin: (Math.random() - 0.5) * 24,
         bornAt: now,
         lastUpdate: now,
+        lastPointerX: startPosition.x,
+        lastPointerY: startPosition.y,
+        lastPointerTime: now,
         sticky: isSticky,
         dragging: false,
         pointerId: null,
@@ -417,10 +412,11 @@
         message.pointerId = event.pointerId;
         element.setPointerCapture(event.pointerId);
         element.classList.add('is-dragging');
-        message.vx = 0;
-        message.vy = 0;
         message.dragOffsetX = event.clientX - message.x;
         message.dragOffsetY = event.clientY - message.y;
+        message.lastPointerX = event.clientX;
+        message.lastPointerY = event.clientY;
+        message.lastPointerTime = performance.now();
         event.preventDefault();
       });
 
@@ -429,9 +425,20 @@
           return;
         }
 
+        const now = performance.now();
+        const deltaTime = Math.max((now - message.lastPointerTime) / 1000, 0.016);
+        const pointerDeltaX = event.clientX - message.lastPointerX;
+        const pointerDeltaY = event.clientY - message.lastPointerY;
         const bounds = getViewportBounds(message.element);
         message.x = clamp(event.clientX - message.dragOffsetX, bounds.minX, bounds.maxX);
         message.y = clamp(event.clientY - message.dragOffsetY, bounds.minY, bounds.maxY);
+        message.vx = clamp(pointerDeltaX / deltaTime, -900, 900);
+        message.vy = clamp(pointerDeltaY / deltaTime, -900, 900);
+        message.spin = clamp(message.spin + (pointerDeltaX - pointerDeltaY) * 0.015, -180, 180);
+        message.rotation += (pointerDeltaX + pointerDeltaY) * 0.02;
+        message.lastPointerX = event.clientX;
+        message.lastPointerY = event.clientY;
+        message.lastPointerTime = now;
       });
 
       function finishDrag(event) {
@@ -442,10 +449,8 @@
         message.dragging = false;
         message.pointerId = null;
         element.classList.remove('is-dragging');
-        message.vx = (Math.random() - 0.5) * 120;
-        message.vy = -70 - Math.random() * 90;
-        message.rotation = (Math.random() - 0.5) * 18;
-        message.spin = (Math.random() - 0.5) * 24;
+        message.vx *= 0.92;
+        message.vy *= 0.92;
       }
 
       element.addEventListener('pointerup', finishDrag);
@@ -461,8 +466,13 @@
       }
 
       messageTimer = setInterval(() => {
-        if (!countdownComplete) {
+        if (!countdownComplete && messagesSpawned < totalMessages) {
           spawnMessage();
+          messagesSpawned += 1;
+
+          if (messagesSpawned >= totalMessages) {
+            stopMessageBursts();
+          }
         }
       }, spawnIntervalMs);
     }
@@ -490,28 +500,26 @@
 
           if (message.x <= bounds.minX || message.x >= bounds.maxX) {
             message.vx *= -1;
+            message.vx *= 0.96;
             message.x = clamp(message.x, bounds.minX, bounds.maxX);
           }
 
           if (message.y <= bounds.minY || message.y >= bounds.maxY) {
             message.vy *= -1;
+            message.vy *= 0.96;
             message.y = clamp(message.y, bounds.minY, bounds.maxY);
           }
 
-          message.vx *= 0.998;
-          message.vy *= 0.998;
+            message.vx *= 0.9995;
+            message.vy *= 0.9995;
         }
 
         const age = now - message.bornAt;
-        const burstScale = age < 260 ? 0.42 + (age / 260) * 0.66 : 1;
-        const floatPulse = message.dragging ? 1 : 1 + Math.sin((now / 900) + (index * 0.5)) * 0.015;
+          const burstScale = age < 220 ? 0.46 + (age / 220) * 0.54 : 1;
+          const floatPulse = message.dragging ? 1 : 1 + Math.sin((now / 1200) + (index * 0.5)) * 0.01;
 
         message.element.style.opacity = String(Math.min(age / 240, 1));
         applyMessageTransform(message, burstScale * floatPulse);
-
-        if (!message.sticky && age > messageLifetimeMs && !message.dragging) {
-          removeMessage(message);
-        }
       }
     }
 
@@ -558,7 +566,6 @@
       secondsEl.textContent = pad(seconds);
     }
 
-    spawnMessage('Sabko aana hai plzz');
     startMessageBursts();
     animationFrameId = requestAnimationFrame(animateMessages);
     render();
